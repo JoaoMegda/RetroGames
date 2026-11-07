@@ -1,4 +1,5 @@
 using RetroGames.Model;
+using RetroGames.Model.Model;
 using RetroGames.WebApi.ApiModels;
 
 namespace RetroGames.WebApi.Mappers;

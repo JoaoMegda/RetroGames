@@ -1,5 +1,6 @@
 using Moq;
 using RetroGames.Model;
+using RetroGames.Model.Model;
 using RetroGames.Repository;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using RetroGames.Model;
+using RetroGames.Model.Constantes;
+using RetroGames.Model.Model;
 using RetroGames.Repository;
 using RetroGames.Services.ServiceModels;
 
@@ -45,7 +47,7 @@ public class AutenticacaoService : IAutenticacaoService
             Email = email,
             Ativo = true,
             DataCadastro = DateTime.UtcNow,
-            IdPerfil = Perfis.IdAdministrador,
+            IdPerfil = PerfisIds.Administrador,
         };
         usuario.SenhaHash = _hasher.HashPassword(usuario, senha);
 

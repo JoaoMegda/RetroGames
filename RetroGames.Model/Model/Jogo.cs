@@ -1,4 +1,4 @@
-namespace RetroGames.Model;
+namespace RetroGames.Model.Model;
 
 public class Jogo
 {
@@ -23,7 +23,7 @@ public class Jogo
     /// <summary>st_ativo</summary>
     public bool Ativo { get; set; }
 
-    /// <summary>dt_cadastro (UTC)</summary>
+    /// <summary>dt_cadastro</summary>
     public DateTime DataCadastro { get; set; }
 
     /// <summary>co_plataforma</summary>

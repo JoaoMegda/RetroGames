@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using RetroGames.Model;
+using RetroGames.Model.Model;
 using RetroGames.Repository;
 using RetroGames.Services;
 

@@ -1,4 +1,5 @@
 using RetroGames.Model;
+using RetroGames.Model.Model;
 
 namespace RetroGames.Repository;
 

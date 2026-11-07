@@ -1,4 +1,4 @@
-namespace RetroGames.Model;
+namespace RetroGames.Model.Model;
 
 public class CondicaoJogo
 {

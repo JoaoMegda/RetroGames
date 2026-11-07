@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RetroGames.Model;
+using RetroGames.Model.Constantes;
+using RetroGames.Model.Model;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
 using RetroGames.WebApi.Mappers;
