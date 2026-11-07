@@ -28,7 +28,7 @@ public class PlataformaServiceTests
     [Fact]
     public async Task InserirAsync_NomeJaCadastrado_LancaPlataformaNomeDuplicado()
     {
-        _plataformas.Setup(r => r.ObterPorNomeAsync("Super Nintendo")).ReturnsAsync(NovaPlataforma(1));
+        _plataformas.Setup(r => r.ExisteComNomeAsync("Super Nintendo", null)).ReturnsAsync(true);
 
         var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.InserirAsync(NovaPlataforma()));
 
@@ -38,7 +38,7 @@ public class PlataformaServiceTests
     [Fact]
     public async Task InserirAsync_RepositorioRecusaPorUnique_LancaPlataformaNomeDuplicado()
     {
-        _plataformas.Setup(r => r.ObterPorNomeAsync(It.IsAny<string>())).ReturnsAsync((Plataforma?)null);
+        _plataformas.Setup(r => r.ExisteComNomeAsync(It.IsAny<string>(), null)).ReturnsAsync(false);
         _plataformas.Setup(r => r.InserirAsync(It.IsAny<Plataforma>())).ThrowsAsync(new RegistroDuplicadoException());
 
         var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.InserirAsync(NovaPlataforma()));
@@ -49,7 +49,7 @@ public class PlataformaServiceTests
     [Fact]
     public async Task InserirAsync_NomeNovo_RetornaPlataformaComIdGerado()
     {
-        _plataformas.Setup(r => r.ObterPorNomeAsync(It.IsAny<string>())).ReturnsAsync((Plataforma?)null);
+        _plataformas.Setup(r => r.ExisteComNomeAsync(It.IsAny<string>(), null)).ReturnsAsync(false);
         _plataformas.Setup(r => r.InserirAsync(It.IsAny<Plataforma>())).ReturnsAsync(7);
 
         var resultado = await _service.InserirAsync(NovaPlataforma());
@@ -61,7 +61,7 @@ public class PlataformaServiceTests
     public async Task ExcluirAsync_ComJogosVinculados_LancaPlataformaPossuiJogos()
     {
         _plataformas.Setup(r => r.ObterPorIdAsync(1)).ReturnsAsync(NovaPlataforma(1));
-        _jogos.Setup(r => r.ContarPorPlataformaAsync(1)).ReturnsAsync(3);
+        _plataformas.Setup(r => r.PossuiJogosAsync(1)).ReturnsAsync(true);
 
         var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ExcluirAsync(1));
 

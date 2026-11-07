@@ -50,15 +50,15 @@ public class PlataformaService : IPlataformaService
     public async Task ExcluirAsync(int id)
     {
         await ObterAsync(id);
-        if (await _repositorios.Jogo.ContarPorPlataformaAsync(id) > 0)
+        if (await _repositorios.Plataforma.PossuiJogosAsync(id))
             throw new BusinessRuleException(BusinessErrors.PlataformaPossuiJogos);
         await _repositorios.Plataforma.ExcluirAsync(id);
     }
 
     private async Task GarantirNomeUnicoAsync(Plataforma plataforma)
     {
-        var existente = await _repositorios.Plataforma.ObterPorNomeAsync(plataforma.Nome);
-        if (existente is not null && existente.Id != plataforma.Id)
+        int? idIgnorar = plataforma.Id > 0 ? plataforma.Id : null;
+        if (await _repositorios.Plataforma.ExisteComNomeAsync(plataforma.Nome, idIgnorar))
             throw new BusinessRuleException(BusinessErrors.PlataformaNomeDuplicado);
     }
 }

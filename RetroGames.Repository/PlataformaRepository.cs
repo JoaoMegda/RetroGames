@@ -25,9 +25,23 @@ public class PlataformaRepository : RepositoryBase, IPlataformaRepository
         ConsultarUmAsync($"SELECT {Colunas} FROM tb_plataforma WHERE co_seq_plataforma = @id",
             p => p.AddWithValue("@id", id), Mapear);
 
-    public Task<Plataforma?> ObterPorNomeAsync(string nome) =>
-        ConsultarUmAsync($"SELECT {Colunas} FROM tb_plataforma WHERE no_plataforma = @nome",
-            p => p.AddWithValue("@nome", nome), Mapear);
+    public async Task<bool> ExisteComNomeAsync(string nome, int? idIgnorar = null)
+    {
+        var filtroId = idIgnorar.HasValue ? " AND co_seq_plataforma <> @idIgnorar" : string.Empty;
+        var quantidade = await ContarAsync(
+            $"SELECT COUNT(*) FROM tb_plataforma WHERE no_plataforma = @nome{filtroId}",
+            p =>
+            {
+                p.AddWithValue("@nome", nome);
+                if (idIgnorar.HasValue)
+                    p.AddWithValue("@idIgnorar", idIgnorar.Value);
+            });
+        return quantidade > 0;
+    }
+
+    public async Task<bool> PossuiJogosAsync(int idPlataforma) =>
+        await ContarAsync("SELECT COUNT(*) FROM tb_jogo WHERE co_plataforma = @idPlataforma",
+            p => p.AddWithValue("@idPlataforma", idPlataforma)) > 0;
 
     public async Task<int> InserirAsync(Plataforma plataforma)
     {
@@ -43,9 +57,9 @@ public class PlataformaRepository : RepositoryBase, IPlataformaRepository
         return (int)idGerado;
     }
 
-    public async Task<bool> AlterarAsync(Plataforma plataforma)
+    public async Task AlterarAsync(Plataforma plataforma)
     {
-        var (_, linhas) = await ExecutarGravacaoAsync(
+        await ExecutarGravacaoAsync(
             "UPDATE tb_plataforma SET no_plataforma = @nome, no_fabricante = @fabricante, " +
             "nu_ano_lancamento = @anoLancamento WHERE co_seq_plataforma = @id",
             p =>
@@ -55,10 +69,9 @@ public class PlataformaRepository : RepositoryBase, IPlataformaRepository
                 p.AddWithValue("@fabricante", plataforma.Fabricante);
                 p.AddWithValue("@anoLancamento", plataforma.AnoLancamento);
             });
-        return linhas > 0;
     }
 
-    public async Task<bool> ExcluirAsync(int id) =>
+    public async Task ExcluirAsync(int id) =>
         await ExecutarAsync("DELETE FROM tb_plataforma WHERE co_seq_plataforma = @id",
-            p => p.AddWithValue("@id", id)) > 0;
+            p => p.AddWithValue("@id", id));
 }
