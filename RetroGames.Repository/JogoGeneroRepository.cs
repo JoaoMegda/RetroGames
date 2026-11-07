@@ -14,6 +14,9 @@ public class JogoGeneroRepository : RepositoryBase, IJogoGeneroRepository
         IdGenero = l.GetInt32("co_genero"),
     };
 
+    public Task<List<JogoGenero>> ListarTodosAsync() =>
+        ConsultarAsync("SELECT co_jogo, co_genero FROM tb_jogo_genero", null, Mapear);
+
     public async Task<List<JogoGenero>> ListarPorJogosAsync(IReadOnlyCollection<int> idsJogo)
     {
         if (idsJogo.Count == 0) return new List<JogoGenero>();
@@ -27,13 +30,16 @@ public class JogoGeneroRepository : RepositoryBase, IJogoGeneroRepository
         ConsultarAsync("SELECT co_jogo, co_genero FROM tb_jogo_genero WHERE co_genero = @idGenero",
             p => p.AddWithValue("@idGenero", idGenero), Mapear);
 
-    public Task InserirAsync(JogoGenero jogoGenero) =>
-        ExecutarAsync("INSERT INTO tb_jogo_genero (co_jogo, co_genero) VALUES (@idJogo, @idGenero)",
+    public async Task InserirAsync(JogoGenero jogoGenero)
+    {
+        await ExecutarGravacaoAsync(
+            "INSERT INTO tb_jogo_genero (co_jogo, co_genero) VALUES (@idJogo, @idGenero)",
             p =>
             {
                 p.AddWithValue("@idJogo", jogoGenero.IdJogo);
                 p.AddWithValue("@idGenero", jogoGenero.IdGenero);
             });
+    }
 
     public Task ExcluirPorJogoAsync(int idJogo) =>
         ExecutarAsync("DELETE FROM tb_jogo_genero WHERE co_jogo = @idJogo",

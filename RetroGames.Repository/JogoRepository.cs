@@ -83,10 +83,6 @@ public class JogoRepository : RepositoryBase, IJogoRepository
         ConsultarUmAsync($"SELECT {Colunas} FROM tb_jogo WHERE co_seq_jogo = @id",
             p => p.AddWithValue("@id", id), Mapear);
 
-    public Task<int> ContarPorPlataformaAsync(int idPlataforma) =>
-        ContarAsync("SELECT COUNT(*) FROM tb_jogo WHERE co_plataforma = @idPlataforma",
-            p => p.AddWithValue("@idPlataforma", idPlataforma));
-
     public async Task<int> InserirAsync(Jogo jogo)
     {
         var (idGerado, _) = await ExecutarGravacaoAsync(
