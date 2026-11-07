@@ -10,7 +10,7 @@ public class JogoRepository : RepositoryBase, IJogoRepository
         "co_seq_jogo, no_jogo, ds_jogo, nu_ano_lancamento, vl_preco, qt_estoque, st_ativo, dt_cadastro, " +
         "co_plataforma, co_condicao_jogo";
 
-    public JogoRepository(ConfiguracaoBanco configuracao) : base(configuracao) { }
+    public JogoRepository(RepositoryConfig configuracao) : base(configuracao) { }
 
     private static Jogo Mapear(MySqlDataReader l) => new()
     {

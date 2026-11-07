@@ -3,14 +3,12 @@ using RetroGames.Model;
 
 namespace RetroGames.Repository;
 
-public sealed record ConfiguracaoBanco(string StringConexao);
-
 /// <summary>Helpers ADO.NET. Cada chamada abre a própria conexão; dentro de um TransactionScope ela participa da transação do Service.</summary>
 public abstract class RepositoryBase
 {
     private readonly string _stringConexao;
 
-    protected RepositoryBase(ConfiguracaoBanco configuracao) => _stringConexao = configuracao.StringConexao;
+    protected RepositoryBase(RepositoryConfig configuracao) => _stringConexao = configuracao.StringConexao;
 
     protected static object Valor(object? valor) => valor ?? DBNull.Value;
 

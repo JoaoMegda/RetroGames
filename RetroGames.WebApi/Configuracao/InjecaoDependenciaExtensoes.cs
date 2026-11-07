@@ -10,7 +10,7 @@ public static class InjecaoDependenciaExtensoes
 {
     public static IServiceCollection AddRetroGames(this IServiceCollection servicos, string stringConexao)
     {
-        servicos.AddSingleton(new ConfiguracaoBanco(stringConexao));
+        servicos.AddSingleton(new RepositoryConfig(stringConexao));
 
         servicos.AddScoped<ICondicaoJogoRepository, CondicaoJogoRepository>();
         servicos.AddScoped<IGeneroRepository, GeneroRepository>();

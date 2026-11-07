@@ -8,7 +8,7 @@ public class PlataformaRepository : RepositoryBase, IPlataformaRepository
 {
     private const string Colunas = "co_seq_plataforma, no_plataforma, no_fabricante, nu_ano_lancamento";
 
-    public PlataformaRepository(ConfiguracaoBanco configuracao) : base(configuracao) { }
+    public PlataformaRepository(RepositoryConfig configuracao) : base(configuracao) { }
 
     private static Plataforma Mapear(MySqlDataReader l) => new()
     {

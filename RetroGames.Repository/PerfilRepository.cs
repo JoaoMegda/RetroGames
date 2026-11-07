@@ -6,7 +6,7 @@ namespace RetroGames.Repository;
 
 public class PerfilRepository : RepositoryBase, IPerfilRepository
 {
-    public PerfilRepository(ConfiguracaoBanco configuracao) : base(configuracao) { }
+    public PerfilRepository(RepositoryConfig configuracao) : base(configuracao) { }
 
     public Task<Perfil?> ObterPorIdAsync(int id) =>
         ConsultarUmAsync("SELECT co_perfil, ds_perfil FROM tb_perfil WHERE co_perfil = @id",

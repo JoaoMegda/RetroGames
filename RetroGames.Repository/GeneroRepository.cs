@@ -6,7 +6,7 @@ namespace RetroGames.Repository;
 
 public class GeneroRepository : RepositoryBase, IGeneroRepository
 {
-    public GeneroRepository(ConfiguracaoBanco configuracao) : base(configuracao) { }
+    public GeneroRepository(RepositoryConfig configuracao) : base(configuracao) { }
 
     private static Genero Mapear(MySqlDataReader l) => new()
     {

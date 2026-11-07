@@ -8,7 +8,7 @@ public class UsuarioRepository : RepositoryBase, IUsuarioRepository
 {
     private const string Colunas = "co_seq_usuario, no_usuario, ds_email, ds_senha_hash, st_ativo, dt_cadastro, co_perfil";
 
-    public UsuarioRepository(ConfiguracaoBanco configuracao) : base(configuracao) { }
+    public UsuarioRepository(RepositoryConfig configuracao) : base(configuracao) { }
 
     private static Usuario Mapear(MySqlDataReader l) => new()
     {

@@ -8,7 +8,7 @@ public class CondicaoJogoRepository : RepositoryBase, ICondicaoJogoRepository
 {
     private const string Colunas = "co_condicao_jogo, ds_condicao_jogo";
 
-    public CondicaoJogoRepository(ConfiguracaoBanco configuracao) : base(configuracao) { }
+    public CondicaoJogoRepository(RepositoryConfig configuracao) : base(configuracao) { }
 
     private static CondicaoJogo Mapear(MySqlDataReader l) => new()
     {
