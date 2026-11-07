@@ -1,5 +1,4 @@
 using MySqlConnector;
-using RetroGames.Model;
 
 namespace RetroGames.Repository;
 
@@ -12,18 +11,23 @@ public abstract class RepositoryBase
 
     protected static object Valor(object? valor) => valor ?? DBNull.Value;
 
-    private async Task<MySqlConnection> AbrirConexaoAsync()
+    protected async Task<MySqlConnection> AbrirConexaoAsync()
     {
         var conexao = new MySqlConnection(_stringConexao);
         await conexao.OpenAsync();
         return conexao;
     }
 
+    protected static MySqlCommand CriarComando(MySqlConnection conexao, string sql) => new(sql, conexao);
+
+    protected static void AdicionarParametro(MySqlParameterCollection parametros, string nome, object? valor) =>
+        parametros.AddWithValue(nome, Valor(valor));
+
     protected async Task<List<T>> ConsultarAsync<T>(
         string sql, Action<MySqlParameterCollection>? parametros, Func<MySqlDataReader, T> mapear)
     {
         await using var conexao = await AbrirConexaoAsync();
-        await using var comando = new MySqlCommand(sql, conexao);
+        await using var comando = CriarComando(conexao, sql);
         parametros?.Invoke(comando.Parameters);
         await using var leitor = (MySqlDataReader)await comando.ExecuteReaderAsync();
         var itens = new List<T>();
@@ -42,7 +46,7 @@ public abstract class RepositoryBase
     protected async Task<int> ContarAsync(string sql, Action<MySqlParameterCollection>? parametros)
     {
         await using var conexao = await AbrirConexaoAsync();
-        await using var comando = new MySqlCommand(sql, conexao);
+        await using var comando = CriarComando(conexao, sql);
         parametros?.Invoke(comando.Parameters);
         return Convert.ToInt32(await comando.ExecuteScalarAsync());
     }
@@ -51,7 +55,7 @@ public abstract class RepositoryBase
     protected async Task<int> ExecutarAsync(string sql, Action<MySqlParameterCollection>? parametros)
     {
         await using var conexao = await AbrirConexaoAsync();
-        await using var comando = new MySqlCommand(sql, conexao);
+        await using var comando = CriarComando(conexao, sql);
         parametros?.Invoke(comando.Parameters);
         return await comando.ExecuteNonQueryAsync();
     }
@@ -63,7 +67,7 @@ public abstract class RepositoryBase
         try
         {
             await using var conexao = await AbrirConexaoAsync();
-            await using var comando = new MySqlCommand(sql, conexao);
+            await using var comando = CriarComando(conexao, sql);
             parametros(comando.Parameters);
             var linhas = await comando.ExecuteNonQueryAsync();
             return (comando.LastInsertedId, linhas);
@@ -83,7 +87,7 @@ public abstract class RepositoryBase
     {
         var i = 0;
         foreach (var valor in valores)
-            parametros.AddWithValue($"@{prefixo}{i++}", valor);
+            AdicionarParametro(parametros, $"@{prefixo}{i++}", valor);
     }
 }
 
