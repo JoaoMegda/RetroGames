@@ -32,11 +32,24 @@ public class ListarJogoRequestApiModel
     public int? IdGenero { get; set; }
     public int Pagina { get; set; } = 1;
     public int TamanhoPagina { get; set; } = 12;
-    public bool IncluirInativos { get; set; }
 }
 
-/// <summary>Usado no detalhe e como item da lista paginada.</summary>
-public class ConsultarJogoResponseApiModel
+/// <summary>Campos resumidos de um jogo na listagem do catálogo.</summary>
+public class ListarJogoResponseApiModel
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public int AnoLancamento { get; set; }
+    public decimal Preco { get; set; }
+    public int Estoque { get; set; }
+    public bool Ativo { get; set; }
+    public string NomePlataforma { get; set; } = string.Empty;
+    public string DescricaoCondicao { get; set; } = string.Empty;
+    public List<string> Generos { get; set; } = new();
+}
+
+/// <summary>Detalhe de um jogo consultado por id.</summary>
+public class ListarPorIdJogoResponseApiModel
 {
     public int Id { get; set; }
     public string Nome { get; set; } = string.Empty;
@@ -53,9 +66,9 @@ public class ConsultarJogoResponseApiModel
     public List<ConsultarGeneroResponseApiModel> Generos { get; set; } = new();
 }
 
-public class ListarJogoResponseApiModel
+public class PaginaResponseApiModel<T>
 {
-    public List<ConsultarJogoResponseApiModel> Itens { get; set; } = new();
+    public List<T> Itens { get; set; } = new();
     public int Pagina { get; set; }
     public int TamanhoPagina { get; set; }
     public int TotalItens { get; set; }
