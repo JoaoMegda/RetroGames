@@ -30,7 +30,13 @@ builder.Services
         opcoes.Filters.Add<FluentValidationFilter>();
         opcoes.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()); // RS02
     })
-    .ConfigureApiBehaviorOptions(opcoes => opcoes.SuppressModelStateInvalidFilter = true);
+    .ConfigureApiBehaviorOptions(opcoes =>
+    {
+        opcoes.SuppressModelStateInvalidFilter = true;
+        opcoes.InvalidModelStateResponseFactory = _ => new ObjectResult(
+            EnvelopeApiModel.Erro(ResponseCodes.MODEL_STATE_INVALIDO))
+        { StatusCode = StatusCodes.Status400BadRequest };
+    });
 
 builder.Services.AddValidatorsFromAssemblyContaining<InserirPlataformaRequestValidator>();
 
