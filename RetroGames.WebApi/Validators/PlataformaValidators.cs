@@ -8,9 +8,9 @@ public class InserirPlataformaRequestValidator : AbstractValidator<InserirPlataf
     public InserirPlataformaRequestValidator()
     {
         RuleFor(x => x.Nome).NotEmpty().WithMessage("Informe o nome.")
-            .MaximumLength(100).WithMessage("O nome deve ter no máximo 100 caracteres.");
+            .MaximumLength(80).WithMessage("O nome deve ter no máximo 80 caracteres.");
         RuleFor(x => x.Fabricante).NotEmpty().WithMessage("Informe o fabricante.")
-            .MaximumLength(100).WithMessage("O fabricante deve ter no máximo 100 caracteres.");
+            .MaximumLength(80).WithMessage("O fabricante deve ter no máximo 80 caracteres.");
         RuleFor(x => x.AnoLancamento).InclusiveBetween(1970, 2100).WithMessage("Ano de lançamento inválido.");
     }
 }
@@ -20,9 +20,9 @@ public class AlterarPlataformaRequestValidator : AbstractValidator<AlterarPlataf
     public AlterarPlataformaRequestValidator()
     {
         RuleFor(x => x.Nome).NotEmpty().WithMessage("Informe o nome.")
-            .MaximumLength(100).WithMessage("O nome deve ter no máximo 100 caracteres.");
+            .MaximumLength(80).WithMessage("O nome deve ter no máximo 80 caracteres.");
         RuleFor(x => x.Fabricante).NotEmpty().WithMessage("Informe o fabricante.")
-            .MaximumLength(100).WithMessage("O fabricante deve ter no máximo 100 caracteres.");
+            .MaximumLength(80).WithMessage("O fabricante deve ter no máximo 80 caracteres.");
         RuleFor(x => x.AnoLancamento).InclusiveBetween(1970, 2100).WithMessage("Ano de lançamento inválido.");
     }
 }
