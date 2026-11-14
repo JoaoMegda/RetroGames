@@ -20,7 +20,7 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         if (exception is BusinessRuleException negocio)
         {
-            status = ObterStatus(negocio.Erro.Tipo);
+            status = (int)negocio.Erro.Status;
             envelope = EnvelopeApiModel.Erro(negocio.Erro.Resposta);
         }
         else
@@ -35,13 +35,4 @@ public class GlobalExceptionHandler : IExceptionHandler
         return true;
     }
 
-    public static int ObterStatus(TipoErro tipo) => tipo switch
-    {
-        TipoErro.Validacao => StatusCodes.Status400BadRequest,
-        TipoErro.NaoAutenticado => StatusCodes.Status401Unauthorized,
-        TipoErro.SemPermissao => StatusCodes.Status403Forbidden,
-        TipoErro.NaoEncontrado => StatusCodes.Status404NotFound,
-        TipoErro.Conflito => StatusCodes.Status409Conflict,
-        _ => StatusCodes.Status500InternalServerError,
-    };
 }

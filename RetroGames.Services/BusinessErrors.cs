@@ -1,21 +1,23 @@
+using System.Net;
 using RetroGames.WebApi.ApiModels;
 
 namespace RetroGames.Services;
 
-/// <summary>Categoria do erro. O GlobalExceptionHandler converte em status HTTP; o Service não conhece HTTP.</summary>
-public enum TipoErro { Validacao, NaoAutenticado, SemPermissao, NaoEncontrado, Conflito }
-
-public readonly record struct BusinessError((int Code, string DefaultMessage) Resposta, TipoErro Tipo);
+public readonly record struct BusinessError((int Code, string DefaultMessage) Resposta, HttpStatusCode Status);
 
 public static class BusinessErrors
 {
-    public static readonly BusinessError NaoAutenticado = new(ResponseCodes.NAO_AUTENTICADO, TipoErro.NaoAutenticado);
-    public static readonly BusinessError CredenciaisInvalidas = new(ResponseCodes.CREDENCIAIS_INVALIDAS, TipoErro.NaoAutenticado);
-    public static readonly BusinessError PlataformaNaoEncontrada = new(ResponseCodes.PLATAFORMA_NAO_ENCONTRADA, TipoErro.NaoEncontrado);
-    public static readonly BusinessError PlataformaNomeDuplicado = new(ResponseCodes.PLATAFORMA_NOME_DUPLICADO, TipoErro.Conflito);
-    public static readonly BusinessError PlataformaPossuiJogos = new(ResponseCodes.PLATAFORMA_POSSUI_JOGOS, TipoErro.Conflito);
-    public static readonly BusinessError JogoNaoEncontrado = new(ResponseCodes.JOGO_NAO_ENCONTRADO, TipoErro.NaoEncontrado);
-    public static readonly BusinessError PlataformaInexistente = new(ResponseCodes.PLATAFORMA_INEXISTENTE, TipoErro.Validacao);
-    public static readonly BusinessError CondicaoInexistente = new(ResponseCodes.CONDICAO_INEXISTENTE, TipoErro.Validacao);
-    public static readonly BusinessError GeneroInexistente = new(ResponseCodes.GENERO_INEXISTENTE, TipoErro.Validacao);
+    public static readonly BusinessError NaoAutenticado = new(ResponseCodes.NAO_AUTENTICADO, HttpStatusCode.Unauthorized);
+    public static readonly BusinessError CredenciaisInvalidas = new(ResponseCodes.CREDENCIAIS_INVALIDAS, HttpStatusCode.Unauthorized);
+
+    public static readonly BusinessError PlataformaNaoEncontrada = new((100, "Plataforma não encontrada."), HttpStatusCode.NotFound);
+    public static readonly BusinessError PlataformaNomeDuplicado = new((101, "Já existe uma plataforma com este nome."), HttpStatusCode.Conflict);
+    public static readonly BusinessError PlataformaPossuiJogos = new((102, "Não é possível excluir: existem jogos desta plataforma."), HttpStatusCode.Conflict);
+    public static readonly BusinessError JogoNaoEncontrado = new((103, "Jogo não encontrado."), HttpStatusCode.NotFound);
+    public static readonly BusinessError CondicaoNaoEncontrada = new((104, "Condição do jogo não encontrada."), HttpStatusCode.NotFound);
+    public static readonly BusinessError GeneroNaoEncontrado = new((105, "Gênero não encontrado."), HttpStatusCode.NotFound);
+
+    public static readonly BusinessError PlataformaInexistente = new(ResponseCodes.PLATAFORMA_INEXISTENTE, HttpStatusCode.BadRequest);
+    public static readonly BusinessError CondicaoInexistente = new(ResponseCodes.CONDICAO_INEXISTENTE, HttpStatusCode.BadRequest);
+    public static readonly BusinessError GeneroInexistente = new(ResponseCodes.GENERO_INEXISTENTE, HttpStatusCode.BadRequest);
 }
