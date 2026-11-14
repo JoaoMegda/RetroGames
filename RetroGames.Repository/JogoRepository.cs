@@ -107,7 +107,7 @@ public class JogoRepository : RepositoryBase, IJogoRepository
     public async Task<bool> AlterarAsync(Jogo jogo) =>
         await ExecutarAsync(
             "UPDATE tb_jogo SET no_jogo = @nome, ds_jogo = @descricao, nu_ano_lancamento = @anoLancamento, " +
-            "vl_preco = @preco, qt_estoque = @estoque, co_plataforma = @idPlataforma, co_condicao_jogo = @idCondicaoJogo " +
+            "vl_preco = @preco, qt_estoque = @estoque, st_ativo = @ativo, co_plataforma = @idPlataforma, co_condicao_jogo = @idCondicaoJogo " +
             "WHERE co_seq_jogo = @id",
             p =>
             {
@@ -117,6 +117,7 @@ public class JogoRepository : RepositoryBase, IJogoRepository
                 p.AddWithValue("@anoLancamento", jogo.AnoLancamento);
                 p.AddWithValue("@preco", jogo.Preco);
                 p.AddWithValue("@estoque", jogo.Estoque);
+                p.AddWithValue("@ativo", jogo.Ativo);
                 p.AddWithValue("@idPlataforma", jogo.IdPlataforma);
                 p.AddWithValue("@idCondicaoJogo", jogo.IdCondicaoJogo);
             }) > 0;

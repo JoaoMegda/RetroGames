@@ -26,6 +26,7 @@ public static class JogoMapper
         AnoLancamento = request.AnoLancamento,
         Preco = request.Preco,
         Estoque = request.Estoque,
+        Ativo = request.Ativo,
         IdPlataforma = request.IdPlataforma,
         IdCondicaoJogo = request.IdCondicaoJogo,
     };

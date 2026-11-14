@@ -9,9 +9,10 @@ public class InserirJogoRequestValidator : AbstractValidator<InserirJogoRequestA
     {
         RuleFor(x => x.Nome).NotEmpty().WithMessage("Informe o nome.")
             .MaximumLength(150).WithMessage("O nome deve ter no máximo 150 caracteres.");
-        RuleFor(x => x.Descricao).MaximumLength(2000).WithMessage("A descrição deve ter no máximo 2000 caracteres.");
+        RuleFor(x => x.Descricao).MaximumLength(1000).WithMessage("A descrição deve ter no máximo 1000 caracteres.");
         RuleFor(x => x.AnoLancamento).InclusiveBetween(1970, 2100).WithMessage("Ano de lançamento inválido."); // RN06
-        RuleFor(x => x.Preco).GreaterThan(0).WithMessage("O preço deve ser maior que zero.");                  // RN06
+        RuleFor(x => x.Preco).GreaterThanOrEqualTo(0).WithMessage("O preço não pode ser negativo.")
+            .PrecisionScale(10, 2, ignoreTrailingZeros: true).WithMessage("O preço deve ter no máximo duas casas decimais."); // RN06
         RuleFor(x => x.Estoque).GreaterThanOrEqualTo(0).WithMessage("O estoque não pode ser negativo.");       // RN06
         RuleFor(x => x.IdPlataforma).GreaterThan(0).WithMessage("Informe a plataforma.");
         RuleFor(x => x.IdCondicaoJogo).GreaterThan(0).WithMessage("Informe a condição.");
@@ -26,9 +27,10 @@ public class AlterarJogoRequestValidator : AbstractValidator<AlterarJogoRequestA
     {
         RuleFor(x => x.Nome).NotEmpty().WithMessage("Informe o nome.")
             .MaximumLength(150).WithMessage("O nome deve ter no máximo 150 caracteres.");
-        RuleFor(x => x.Descricao).MaximumLength(2000).WithMessage("A descrição deve ter no máximo 2000 caracteres.");
+        RuleFor(x => x.Descricao).MaximumLength(1000).WithMessage("A descrição deve ter no máximo 1000 caracteres.");
         RuleFor(x => x.AnoLancamento).InclusiveBetween(1970, 2100).WithMessage("Ano de lançamento inválido.");
-        RuleFor(x => x.Preco).GreaterThan(0).WithMessage("O preço deve ser maior que zero.");
+        RuleFor(x => x.Preco).GreaterThanOrEqualTo(0).WithMessage("O preço não pode ser negativo.")
+            .PrecisionScale(10, 2, ignoreTrailingZeros: true).WithMessage("O preço deve ter no máximo duas casas decimais.");
         RuleFor(x => x.Estoque).GreaterThanOrEqualTo(0).WithMessage("O estoque não pode ser negativo.");
         RuleFor(x => x.IdPlataforma).GreaterThan(0).WithMessage("Informe a plataforma.");
         RuleFor(x => x.IdCondicaoJogo).GreaterThan(0).WithMessage("Informe a condição.");
