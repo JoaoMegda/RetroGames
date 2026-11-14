@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using RetroGames.Model.Constantes;
+using Microsoft.AspNetCore.Authorization;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
 using RetroGames.WebApi.Mappers;
@@ -14,23 +14,22 @@ public class JogoController : ControllerBase
 
     public JogoController(IJogoService service) => _service = service;
 
-    private bool EhAdministrador => User.IsInRole(Perfis.NomeAdministrador);
-
     [HttpGet]
     public async Task<IActionResult> Listar([FromQuery] ListarJogoRequestApiModel request)
     {
-        var lista = await _service.ListarAsync(JogoMapper.ParaServiceModel(request), ehAdministrador: false);
+        var lista = await _service.ListarAsync(JogoMapper.ParaServiceModel(request));
         return Ok(EnvelopeApiModel.Sucesso(JogoMapper.ParaPaginaResponse(lista)));
     }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> ListarPorId(int id)
     {
-        var jogo = await _service.ObterAsync(id, EhAdministrador);
+        var jogo = await _service.ObterAsync(id);
         return Ok(EnvelopeApiModel.Sucesso(JogoMapper.ParaDetalheResponse(jogo)));
     }
 
     [HttpPost]
+    [Authorize(Policy = "SomenteAdministrador")]
     public async Task<IActionResult> Inserir([FromBody] InserirJogoRequestApiModel request)
     {
         var jogo = await _service.InserirAsync(JogoMapper.ParaModel(request), request.IdsGenero);
@@ -39,6 +38,7 @@ public class JogoController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "SomenteAdministrador")]
     public async Task<IActionResult> Alterar(int id, [FromBody] AlterarJogoRequestApiModel request)
     {
         var jogo = await _service.AlterarAsync(JogoMapper.ParaModel(id, request), request.IdsGenero);
@@ -46,6 +46,7 @@ public class JogoController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Policy = "SomenteAdministrador")]
     public async Task<IActionResult> Desativar(int id)
     {
         await _service.DesativarAsync(id);

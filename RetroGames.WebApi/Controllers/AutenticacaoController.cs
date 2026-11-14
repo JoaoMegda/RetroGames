@@ -25,6 +25,7 @@ public class AutenticacaoController : ControllerBase
 
     /// <summary>Emite o token no cookie XSRF-TOKEN (legível pelo JS). Chamar de novo após login e logout.</summary>
     [HttpGet("csrf")]
+    [AllowAnonymous]
     public IActionResult Csrf()
     {
         var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
@@ -38,6 +39,7 @@ public class AutenticacaoController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] AutenticarUsuarioRequestApiModel request)
     {
         var usuario = await _service.AutenticarAsync(request.Email.Trim(), request.Senha);
@@ -56,7 +58,7 @@ public class AutenticacaoController : ControllerBase
     }
 
     [HttpPost("logout")]
-    [Authorize(Policy = "SomenteAdministrador")]
+    [Authorize]
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -64,7 +66,7 @@ public class AutenticacaoController : ControllerBase
     }
 
     [HttpGet("eu")]
-    [Authorize(Policy = "SomenteAdministrador")]
+    [Authorize]
     public async Task<IActionResult> Eu()
     {
         var id = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);

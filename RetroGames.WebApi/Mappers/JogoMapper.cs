@@ -36,6 +36,7 @@ public static class JogoMapper
         Busca = request.Busca,
         IdPlataforma = request.IdPlataforma,
         IdGenero = request.IdGenero,
+        IncluirInativos = request.IncluirInativos,
         Pagina = request.Pagina,
         TamanhoPagina = request.TamanhoPagina,
     };

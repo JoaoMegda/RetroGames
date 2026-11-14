@@ -6,8 +6,8 @@ namespace RetroGames.Services;
 
 public interface IJogoService
 {
-    Task<ListaPaginadaServiceModel<JogoDetalheServiceModel>> ListarAsync(JogoFiltroServiceModel filtro, bool ehAdministrador);
-    Task<JogoDetalheServiceModel> ObterAsync(int id, bool ehAdministrador);
+    Task<ListaPaginadaServiceModel<JogoDetalheServiceModel>> ListarAsync(JogoFiltroServiceModel filtro);
+    Task<JogoDetalheServiceModel> ObterAsync(int id);
     Task<JogoDetalheServiceModel> InserirAsync(Jogo jogo, IReadOnlyCollection<int> idsGenero);
     Task<JogoDetalheServiceModel> AlterarAsync(Jogo jogo, IReadOnlyCollection<int> idsGenero);
     Task DesativarAsync(int id);

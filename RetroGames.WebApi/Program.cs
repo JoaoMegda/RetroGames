@@ -23,6 +23,8 @@ var stringConexao = builder.Configuration.GetConnectionString("Default")
 builder.Services
     .AddRepositories(stringConexao)
     .AddServices();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUsuarioAtualService, UsuarioAtualService>();
 
 builder.Services
     .AddControllersWithViews(opcoes =>
@@ -46,6 +48,9 @@ builder.Services.AddAntiforgery(opcoes =>
     opcoes.Cookie.Name = "retrogames.antiforgery";
     opcoes.Cookie.SameSite = SameSiteMode.Strict;
     opcoes.Cookie.HttpOnly = true;
+    opcoes.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;
 });
 
 // RS01: cookie HttpOnly, SameSite=Strict, expiração deslizante de 2 horas
@@ -56,6 +61,9 @@ builder.Services
         opcoes.Cookie.Name = "retrogames.sessao";
         opcoes.Cookie.HttpOnly = true;
         opcoes.Cookie.SameSite = SameSiteMode.Strict;
+        opcoes.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
         opcoes.ExpireTimeSpan = TimeSpan.FromHours(2);
         opcoes.SlidingExpiration = true;
         opcoes.Events.OnRedirectToLogin = contexto =>

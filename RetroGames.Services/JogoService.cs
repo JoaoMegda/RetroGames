@@ -9,18 +9,23 @@ namespace RetroGames.Services;
 public class JogoService : IJogoService
 {
     private readonly IRepositorySet _repositorios;
+    private readonly IUsuarioAtualService _usuarioAtual;
 
-    public JogoService(IRepositorySet repositorios) => _repositorios = repositorios;
+    public JogoService(IRepositorySet repositorios, IUsuarioAtualService usuarioAtual)
+    {
+        _repositorios = repositorios;
+        _usuarioAtual = usuarioAtual;
+    }
 
     // RN04: inativos só para o Administrador
     public async Task<ListaPaginadaServiceModel<JogoDetalheServiceModel>> ListarAsync(
-        JogoFiltroServiceModel filtro, bool ehAdministrador)
+        JogoFiltroServiceModel filtro)
     {
         var filtroRepositorio = new JogoFiltro
         {
             Busca = filtro.Busca,
             IdPlataforma = filtro.IdPlataforma,
-            IncluirInativos = filtro.IncluirInativos && ehAdministrador,
+            IncluirInativos = filtro.IncluirInativos && _usuarioAtual.EhAdministrador,
             Pagina = filtro.Pagina,
             TamanhoPagina = filtro.TamanhoPagina,
         };
@@ -45,10 +50,10 @@ public class JogoService : IJogoService
         };
     }
 
-    public async Task<JogoDetalheServiceModel> ObterAsync(int id, bool ehAdministrador)
+    public async Task<JogoDetalheServiceModel> ObterAsync(int id)
     {
         var jogo = await _repositorios.Jogo.ObterPorIdAsync(id);
-        if (jogo is null || (!jogo.Ativo && !ehAdministrador))
+        if (jogo is null || (!jogo.Ativo && !_usuarioAtual.EhAdministrador))
             throw new BusinessRuleException(BusinessErrors.JogoNaoEncontrado);
 
         return (await MontarDetalhesAsync(new[] { jogo })).Single();
@@ -76,7 +81,7 @@ public class JogoService : IJogoService
             transactionScope.Complete();
         }
 
-        return await ObterAsync(jogo.Id, ehAdministrador: true);
+        return await ObterAsync(jogo.Id);
     }
 
     public async Task<JogoDetalheServiceModel> AlterarAsync(Jogo jogo, IReadOnlyCollection<int> idsGenero)
@@ -102,7 +107,7 @@ public class JogoService : IJogoService
             transactionScope.Complete();
         }
 
-        return await ObterAsync(jogo.Id, ehAdministrador: true);
+        return await ObterAsync(jogo.Id);
     }
 
     // RN03: exclusão lógica (st_ativo = 0), preservando o registro e as associações

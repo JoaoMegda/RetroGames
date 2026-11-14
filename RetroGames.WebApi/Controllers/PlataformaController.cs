@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
@@ -29,6 +30,7 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "SomenteAdministrador")]
     public async Task<IActionResult> Inserir([FromBody] InserirPlataformaRequestApiModel request)
     {
         var plataforma = await _service.InserirAsync(PlataformaMapper.ParaModel(request));
@@ -37,6 +39,7 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "SomenteAdministrador")]
     public async Task<IActionResult> Alterar(int id, [FromBody] AlterarPlataformaRequestApiModel request)
     {
         var plataforma = await _service.AlterarAsync(PlataformaMapper.ParaModel(id, request));
@@ -44,6 +47,7 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Policy = "SomenteAdministrador")]
     public async Task<IActionResult> Excluir(int id)
     {
         await _service.ExcluirAsync(id);
