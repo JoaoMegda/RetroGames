@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
+using RetroGames.WebApi.Mappers;
 
 namespace RetroGames.WebApi.Controllers;
 
@@ -16,7 +17,6 @@ public class GeneroController : ControllerBase
     public async Task<IActionResult> Listar()
     {
         var generos = await _service.ListarAsync();
-        return Ok(EnvelopeApiModel.Sucesso(generos
-            .Select(g => new ConsultarGeneroResponseApiModel { Id = g.Id, Nome = g.Nome }).ToList()));
+        return Ok(EnvelopeApiModel.Sucesso(generos.Select(GeneroMapper.ParaResponse).ToList()));
     }
 }

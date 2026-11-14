@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
+using RetroGames.WebApi.Mappers;
 
 namespace RetroGames.WebApi.Controllers;
 
-/// <summary>Uma classe por tabela (AGENTS.md), mas a rota segue o contrato da especificação (5.2).</summary>
 [ApiController]
-[Route("api/TabelaTipo/condicoes-jogo")]
+[Route("api/[controller]")]
 public class CondicaoJogoController : ControllerBase
 {
     private readonly ICondicaoJogoService _service;
@@ -17,7 +17,6 @@ public class CondicaoJogoController : ControllerBase
     public async Task<IActionResult> Listar()
     {
         var condicoes = await _service.ListarAsync();
-        return Ok(EnvelopeApiModel.Sucesso(condicoes
-            .Select(c => new ConsultarCondicaoJogoResponseApiModel { Id = c.Id, Descricao = c.Descricao }).ToList()));
+        return Ok(EnvelopeApiModel.Sucesso(condicoes.Select(CondicaoJogoMapper.ParaResponse).ToList()));
     }
 }
