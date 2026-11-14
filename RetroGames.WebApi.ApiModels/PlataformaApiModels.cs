@@ -14,8 +14,8 @@ public class AlterarPlataformaRequestApiModel
     public int AnoLancamento { get; set; }
 }
 
-/// <summary>Usado em listagem, consulta, inclusão e alteração.</summary>
-public class ConsultarPlataformaResponseApiModel
+/// <summary>Representação pública de uma plataforma no catálogo.</summary>
+public class ListarPlataformaResponseApiModel
 {
     public int Id { get; set; }
     public string Nome { get; set; } = string.Empty;

@@ -25,7 +25,7 @@ builder.Services
     .AddServices();
 
 builder.Services
-    .AddControllers(opcoes =>
+    .AddControllersWithViews(opcoes =>
     {
         opcoes.Filters.Add<FluentValidationFilter>();
         opcoes.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()); // RS02

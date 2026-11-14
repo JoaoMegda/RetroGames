@@ -21,7 +21,7 @@ public static class PlataformaMapper
         AnoLancamento = request.AnoLancamento,
     };
 
-    public static ConsultarPlataformaResponseApiModel ParaResponse(Plataforma plataforma) => new()
+    public static ListarPlataformaResponseApiModel ParaResponse(Plataforma plataforma) => new()
     {
         Id = plataforma.Id,
         Nome = plataforma.Nome,
