@@ -19,6 +19,7 @@ public class PlataformaService : IPlataformaService
     // RN01
     public async Task<Plataforma> InserirAsync(Plataforma plataforma)
     {
+        NormalizarNome(plataforma);
         await GarantirNomeUnicoAsync(plataforma);
         try
         {
@@ -34,6 +35,7 @@ public class PlataformaService : IPlataformaService
     public async Task<Plataforma> AlterarAsync(Plataforma plataforma)
     {
         await ObterAsync(plataforma.Id);
+        NormalizarNome(plataforma);
         await GarantirNomeUnicoAsync(plataforma);
         try
         {
@@ -61,4 +63,6 @@ public class PlataformaService : IPlataformaService
         if (await _repositorios.Plataforma.ExisteComNomeAsync(plataforma.Nome, idIgnorar))
             throw new BusinessRuleException(BusinessErrors.PlataformaNomeDuplicado);
     }
+
+    private static void NormalizarNome(Plataforma plataforma) => plataforma.Nome = plataforma.Nome.Trim();
 }

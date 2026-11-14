@@ -32,7 +32,7 @@ public class PlataformaServiceTests
 
         var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.InserirAsync(NovaPlataforma()));
 
-        Assert.Equal(ResponseCodes.PLATAFORMA_NOME_DUPLICADO.Code, erro.Erro.Resposta.Code);
+        Assert.Equal(BusinessErrors.PlataformaNomeDuplicado.Resposta.Code, erro.Erro.Resposta.Code);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class PlataformaServiceTests
 
         var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.InserirAsync(NovaPlataforma()));
 
-        Assert.Equal(ResponseCodes.PLATAFORMA_NOME_DUPLICADO.Code, erro.Erro.Resposta.Code);
+        Assert.Equal(BusinessErrors.PlataformaNomeDuplicado.Resposta.Code, erro.Erro.Resposta.Code);
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class PlataformaServiceTests
 
         var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ExcluirAsync(1));
 
-        Assert.Equal(ResponseCodes.PLATAFORMA_POSSUI_JOGOS.Code, erro.Erro.Resposta.Code);
+        Assert.Equal(BusinessErrors.PlataformaPossuiJogos.Resposta.Code, erro.Erro.Resposta.Code);
         _plataformas.Verify(r => r.ExcluirAsync(It.IsAny<int>()), Times.Never);
     }
 }
