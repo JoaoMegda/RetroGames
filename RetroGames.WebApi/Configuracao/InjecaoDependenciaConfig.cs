@@ -6,9 +6,9 @@ using RetroGames.Services;
 
 namespace RetroGames.WebApi.Configuracao;
 
-public static class InjecaoDependenciaExtensoes
+public static class InjecaoDependenciaConfig
 {
-    public static IServiceCollection AddRetroGames(this IServiceCollection servicos, string stringConexao)
+    public static IServiceCollection AddRepositories(this IServiceCollection servicos, string stringConexao)
     {
         servicos.AddSingleton(new RepositoryConfig(stringConexao));
 
@@ -21,6 +21,11 @@ public static class InjecaoDependenciaExtensoes
         servicos.AddScoped<IUsuarioRepository, UsuarioRepository>();
         servicos.AddScoped<IRepositorySet, RepositorySet>();
 
+        return servicos;
+    }
+
+    public static IServiceCollection AddServices(this IServiceCollection servicos)
+    {
         servicos.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
         servicos.AddScoped<IAutenticacaoService, AutenticacaoService>();
         servicos.AddScoped<ICondicaoJogoService, CondicaoJogoService>();

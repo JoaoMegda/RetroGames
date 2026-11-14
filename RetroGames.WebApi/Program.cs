@@ -20,7 +20,9 @@ var builder = WebApplication.CreateBuilder(args);
 var stringConexao = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("Defina ConnectionStrings__Default no arquivo .env.");
 
-builder.Services.AddRetroGames(stringConexao);
+builder.Services
+    .AddRepositories(stringConexao)
+    .AddServices();
 
 builder.Services
     .AddControllers(opcoes =>
