@@ -116,14 +116,14 @@ public class JogoService : IJogoService
     private async Task ValidarReferenciasAsync(Jogo jogo, IReadOnlyCollection<int> idsGeneroDistintos)
     {
         if (await _repositorios.Plataforma.ObterPorIdAsync(jogo.IdPlataforma) is null)
-            throw new BusinessRuleException(BusinessErrors.PlataformaInexistente);
+            throw new BusinessRuleException(BusinessErrors.PlataformaNaoEncontrada);
 
         if (await _repositorios.CondicaoJogo.ObterPorIdAsync(jogo.IdCondicaoJogo) is null)
-            throw new BusinessRuleException(BusinessErrors.CondicaoInexistente);
+            throw new BusinessRuleException(BusinessErrors.CondicaoNaoEncontrada);
 
         var generos = await _repositorios.Genero.ListarPorIdsAsync(idsGeneroDistintos);
         if (idsGeneroDistintos.Count == 0 || generos.Count != idsGeneroDistintos.Count)
-            throw new BusinessRuleException(BusinessErrors.GeneroInexistente);
+            throw new BusinessRuleException(BusinessErrors.GeneroNaoEncontrado);
     }
 
     /// <summary>Compõe jogos com plataforma, condição e gêneros usando LINQ (consultas de uma tabela cada).</summary>
