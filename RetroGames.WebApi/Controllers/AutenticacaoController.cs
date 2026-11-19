@@ -31,7 +31,6 @@ public class AutenticacaoController : ControllerBase
     }
 
     [HttpPost("logout")]
-    [Authorize]
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -39,7 +38,6 @@ public class AutenticacaoController : ControllerBase
     }
 
     [HttpGet("eu")]
-    [Authorize]
     public async Task<IActionResult> Eu()
     {
         if (User.ObterIdUsuario() is not int id)

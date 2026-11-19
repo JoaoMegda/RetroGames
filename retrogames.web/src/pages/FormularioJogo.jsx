@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { generoApi, jogoApi, plataformaApi, tabelaTipoApi } from '../api/servicos.js';
+import { condicaoJogoApi, generoApi, jogoApi, plataformaApi } from '../api/servicos.js';
 import { obterErrosDosCampos, obterMensagemErro } from '../api/erros.js';
 import { Carregando, MensagemErro } from '../components/MensagensEstado.jsx';
 
@@ -29,7 +29,7 @@ export default function FormularioJogo() {
     setCarregando(true);
     setErroCarga(null);
     Promise.all([
-      plataformaApi.listar(), tabelaTipoApi.listarCondicoesJogo(), generoApi.listar(),
+      plataformaApi.listar(), condicaoJogoApi.listar(), generoApi.listar(),
       edicao ? jogoApi.consultar(id) : Promise.resolve(null),
     ])
       .then(([p, c, g, jogo]) => {
@@ -40,7 +40,7 @@ export default function FormularioJogo() {
             nome: jogo.nome, descricao: jogo.descricao ?? '', anoLancamento: String(jogo.anoLancamento),
             preco: String(jogo.preco), estoque: String(jogo.estoque),
             idPlataforma: String(jogo.idPlataforma), idCondicaoJogo: String(jogo.idCondicaoJogo),
-            idsGenero: jogo.generos.map((x) => x.id),
+            idsGenero: jogo.generos.map((x) => x.id), ativo: jogo.ativo,
           });
         }
       })
@@ -76,7 +76,11 @@ export default function FormularioJogo() {
     };
 
     try {
-      if (edicao) await jogoApi.alterar(id, corpo); else await jogoApi.inserir(corpo);
+      if (edicao) {
+        await jogoApi.alterar(id, { ...corpo, ativo: form.ativo });
+      } else {
+        await jogoApi.inserir(corpo);
+      }
       navegar('/admin/jogos');
     } catch (e) {
       setErrosCampos(obterErrosDosCampos(e));

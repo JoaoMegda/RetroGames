@@ -1,12 +1,12 @@
 using DotNetEnv;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using RetroGames.Model.Constantes;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
 using RetroGames.WebApi.Configuracao;
 using RetroGames.WebApi.Filters;
 using RetroGames.WebApi.Handlers;
+using RetroGames.WebApi.Services;
 using RetroGames.WebApi.Validators;
 
 // O .env (raiz do repositório, fora do Git) vira variáveis de ambiente antes de a configuração ser montada.
@@ -36,8 +36,7 @@ builder.Services
 builder.Services.AddValidatorsFromAssemblyContaining<InserirPlataformaRequestValidator>();
 
 builder.Services.AdicionarAutenticacao(builder.Environment.IsDevelopment());
-builder.Services.AddAuthorization(opcoes =>
-    opcoes.AddPolicy("SomenteAdministrador", politica => politica.RequireRole(Perfis.NomeAdministrador)));
+builder.Services.AdicionarAutorizacao();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddOpenApi();
@@ -48,7 +47,7 @@ app.UseExceptionHandler(_ => { });
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
     app.UseSwaggerUI(opcoes => opcoes.SwaggerEndpoint("/openapi/v1.json", "RetroGames v1"));
 }
 

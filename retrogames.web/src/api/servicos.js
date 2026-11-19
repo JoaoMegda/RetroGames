@@ -21,8 +21,8 @@ export const generoApi = {
   listar: () => dados(api.get('/Genero')),
 };
 
-export const tabelaTipoApi = {
-  listarCondicoesJogo: () => dados(api.get('/TabelaTipo/condicoes-jogo')),
+export const condicaoJogoApi = {
+  listar: () => dados(api.get('/CondicaoJogo')),
 };
 
 export const jogoApi = {

@@ -1,8 +1,9 @@
 using System.Security.Claims;
 using RetroGames.Model.Constantes;
 using RetroGames.Services;
+using RetroGames.WebApi.Extensions;
 
-namespace RetroGames.WebApi.Configuracao;
+namespace RetroGames.WebApi.Services;
 
 /// <summary>Lê a identidade autenticada da requisição HTTP atual.</summary>
 public class UsuarioAtualService : IUsuarioAtualService
@@ -15,9 +16,7 @@ public class UsuarioAtualService : IUsuarioAtualService
 
     public bool EstaAutenticado => Usuario?.Identity?.IsAuthenticated == true;
 
-    public int? Id => int.TryParse(Usuario?.FindFirstValue(ClaimTypes.NameIdentifier), out var id)
-        ? id
-        : null;
+    public int? Id => Usuario?.ObterIdUsuario();
 
     public bool EhAdministrador => Usuario?.IsInRole(Perfis.NomeAdministrador) == true;
 }

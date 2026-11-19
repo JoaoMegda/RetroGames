@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
+using RetroGames.WebApi.Configuracao;
 using RetroGames.WebApi.Mappers;
 
 namespace RetroGames.WebApi.Controllers;
@@ -15,6 +16,7 @@ public class PlataformaController : ControllerBase
     public PlataformaController(IPlataformaService service) => _service = service;
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Listar()
     {
         var plataformas = await _service.ListarAsync();
@@ -23,6 +25,7 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [AllowAnonymous]
     public async Task<IActionResult> ListarPorId(int id)
     {
         var plataforma = await _service.ObterAsync(id);
@@ -30,7 +33,7 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = "SomenteAdministrador")]
+    [Authorize(Policy = Politicas.Administrador)]
     public async Task<IActionResult> Inserir([FromBody] InserirPlataformaRequestApiModel request)
     {
         var plataforma = await _service.InserirAsync(PlataformaMapper.ParaModel(request));
@@ -39,7 +42,7 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Policy = "SomenteAdministrador")]
+    [Authorize(Policy = Politicas.Administrador)]
     public async Task<IActionResult> Alterar(int id, [FromBody] AlterarPlataformaRequestApiModel request)
     {
         var plataforma = await _service.AlterarAsync(PlataformaMapper.ParaModel(id, request));
@@ -47,7 +50,7 @@ public class PlataformaController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Policy = "SomenteAdministrador")]
+    [Authorize(Policy = Politicas.Administrador)]
     public async Task<IActionResult> Excluir(int id)
     {
         await _service.ExcluirAsync(id);
