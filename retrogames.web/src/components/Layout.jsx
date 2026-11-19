@@ -11,7 +11,7 @@ export default function Layout() {
   }
 
   return (
-    <>
+    <div className="d-flex min-vh-100 flex-column">
       <nav className="navbar navbar-expand-md navbar-dark bg-dark">
         <div className="container">
           <Link className="navbar-brand" to="/">RetroGames</Link>
@@ -49,9 +49,12 @@ export default function Layout() {
           </div>
         </div>
       </nav>
-      <main className="container py-4">
+      <main className="container flex-grow-1 py-4">
         <Outlet />
       </main>
-    </>
+      <footer className="border-top py-3 text-body-secondary">
+        <div className="container small">RetroGames</div>
+      </footer>
+    </div>
   );
 }
