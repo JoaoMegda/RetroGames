@@ -27,7 +27,7 @@ export const condicaoJogoApi = {
 
 export const jogoApi = {
   listar: (parametros) => dados(api.get('/Jogo', { params: parametros })),
-  consultar: (id) => dados(api.get(`/Jogo/${id}`)),
+  buscarPorId: (id) => dados(api.get(`/Jogo/${id}`)),
   inserir: (jogo) => dados(api.post('/Jogo', jogo)),
   alterar: (id, jogo) => dados(api.put(`/Jogo/${id}`, jogo)),
   desativar: (id) => dados(api.delete(`/Jogo/${id}`)),

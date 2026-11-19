@@ -14,7 +14,7 @@ export default function DetalheJogo() {
   const carregar = useCallback(() => {
     setCarregando(true);
     setErro(null);
-    jogoApi.consultar(id)
+    jogoApi.buscarPorId(id)
       .then(setJogo)
       .catch((e) => setErro(obterMensagemErro(e)))
       .finally(() => setCarregando(false));

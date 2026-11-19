@@ -30,7 +30,7 @@ export default function FormularioJogo() {
     setErroCarga(null);
     Promise.all([
       plataformaApi.listar(), condicaoJogoApi.listar(), generoApi.listar(),
-      edicao ? jogoApi.consultar(id) : Promise.resolve(null),
+      edicao ? jogoApi.buscarPorId(id) : Promise.resolve(null),
     ])
       .then(([p, c, g, jogo]) => {
         if (!ativo) return;
