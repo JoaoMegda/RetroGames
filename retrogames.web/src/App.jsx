@@ -2,7 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import RotaProtegida from './components/RotaProtegida.jsx';
 import Catalogo from './pages/Catalogo/Catalogo.jsx';
-import DetalheJogo from './pages/DetalheJogo.jsx';
+import DetalheJogo from './pages/Catalogo/DetalheJogo.jsx';
 import Login from './pages/Login.jsx';
 import Jogos from './pages/Jogos.jsx';
 import FormularioJogo from './pages/FormularioJogo.jsx';
