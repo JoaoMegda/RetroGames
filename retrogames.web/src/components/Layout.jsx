@@ -14,7 +14,7 @@ export default function Layout() {
     <>
       <nav className="navbar navbar-expand-md navbar-dark bg-dark">
         <div className="container">
-          <Link className="navbar-brand" to="/">RETROGAMES</Link>
+          <Link className="navbar-brand" to="/">RetroGames</Link>
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu"
                   aria-controls="menu" aria-expanded="false" aria-label="Alternar navegação">
             <span className="navbar-toggler-icon" />
