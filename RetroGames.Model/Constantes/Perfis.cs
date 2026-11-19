@@ -1,7 +1,8 @@
 namespace RetroGames.Model.Constantes;
 
-/// <summary>Nome do perfil administrador usado como papel na API.</summary>
+/// <summary>Nomes dos perfis usados como papéis na API.</summary>
 public static class Perfis
 {
     public const string NomeAdministrador = "Administrador";
+    public const string NomeCliente = "Cliente";
 }

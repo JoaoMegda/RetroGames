@@ -1,5 +1,6 @@
 using MySqlConnector;
 using RetroGames.Model;
+using RetroGames.Model.Constantes;
 using RetroGames.Model.Model;
 
 namespace RetroGames.Repository;
@@ -28,6 +29,10 @@ public class UsuarioRepository : RepositoryBase, IUsuarioRepository
     public Task<Usuario?> ObterPorEmailAsync(string email) =>
         ConsultarUmAsync($"SELECT {Colunas} FROM tb_usuario WHERE ds_email = @email",
             p => p.AddWithValue("@email", email), Mapear);
+
+    public async Task<bool> ExisteAdministradorAsync() =>
+        await ContarAsync("SELECT EXISTS (SELECT 1 FROM tb_usuario WHERE co_perfil = @idPerfil)",
+            parametros => parametros.AddWithValue("@idPerfil", PerfisIds.Administrador)) != 0;
 
     public async Task<int> InserirAsync(Usuario usuario)
     {

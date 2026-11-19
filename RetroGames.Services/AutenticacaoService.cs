@@ -18,12 +18,12 @@ public class AutenticacaoService : IAutenticacaoService
         _hasher = hasher;
     }
 
-    public async Task<UsuarioAutenticadoServiceModel> AutenticarAsync(string email, string senha)
+    public async Task<UsuarioAutenticadoServiceModel?> AutenticarAsync(string email, string senha)
     {
         var usuario = await _repositorios.Usuario.ObterPorEmailAsync(email);
         if (usuario is null || !usuario.Ativo ||
             _hasher.VerifyHashedPassword(usuario, usuario.SenhaHash, senha) == PasswordVerificationResult.Failed)
-            throw new BusinessRuleException(BusinessErrors.CredenciaisInvalidas);
+            return null;
 
         return await MontarAsync(usuario);
     }
@@ -39,7 +39,7 @@ public class AutenticacaoService : IAutenticacaoService
 
     public async Task GarantirAdministradorInicialAsync(string email, string senha)
     {
-        if (await _repositorios.Usuario.ObterPorEmailAsync(email) is not null) return;
+        if (await _repositorios.Usuario.ExisteAdministradorAsync()) return;
 
         var usuario = new Usuario
         {
@@ -57,7 +57,9 @@ public class AutenticacaoService : IAutenticacaoService
         }
         catch (RegistroDuplicadoException)
         {
-            // Outra instância criou o administrador entre a consulta e o INSERT: nada a fazer.
+            // Outra instância pode ter criado o administrador entre a consulta e o INSERT.
+            if (!await _repositorios.Usuario.ExisteAdministradorAsync())
+                throw;
         }
     }
 

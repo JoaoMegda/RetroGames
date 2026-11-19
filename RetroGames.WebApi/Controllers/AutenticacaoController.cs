@@ -43,6 +43,8 @@ public class AutenticacaoController : ControllerBase
     public async Task<IActionResult> Login([FromBody] AutenticarUsuarioRequestApiModel request)
     {
         var usuario = await _service.AutenticarAsync(request.Email.Trim(), request.Senha);
+        if (usuario is null)
+            return Unauthorized(EnvelopeApiModel.Erro(ResponseCodes.CREDENCIAIS_INVALIDAS));
 
         var claims = new List<Claim>
         {

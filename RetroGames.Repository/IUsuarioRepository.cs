@@ -7,5 +7,6 @@ public interface IUsuarioRepository
 {
     Task<Usuario?> ObterPorIdAsync(int id);
     Task<Usuario?> ObterPorEmailAsync(string email);
+    Task<bool> ExisteAdministradorAsync();
     Task<int> InserirAsync(Usuario usuario);
 }

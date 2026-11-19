@@ -8,7 +8,6 @@ public readonly record struct BusinessError((int Code, string DefaultMessage) Re
 public static class BusinessErrors
 {
     public static readonly BusinessError NaoAutenticado = new(ResponseCodes.NAO_AUTENTICADO, HttpStatusCode.Unauthorized);
-    public static readonly BusinessError CredenciaisInvalidas = new(ResponseCodes.CREDENCIAIS_INVALIDAS, HttpStatusCode.Unauthorized);
 
     public static readonly BusinessError PlataformaNaoEncontrada = new((100, "Plataforma não encontrada."), HttpStatusCode.NotFound);
     public static readonly BusinessError PlataformaNomeDuplicado = new((101, "Já existe uma plataforma com este nome."), HttpStatusCode.Conflict);
