@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AutenticacaoContext } from './autenticacaoContext.js';
 import { autenticacaoApi } from '../api/servicos.js';
-import { renovarCsrf } from '../api/api.js';
 
 export default function AutenticacaoProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
@@ -26,7 +25,6 @@ export default function AutenticacaoProvider({ children }) {
 
   const entrar = useCallback(async (email, senha) => {
     const dados = await autenticacaoApi.entrar(email, senha);
-    await renovarCsrf(); // o token antiforgery é atrelado à identidade, que mudou
     setUsuario(dados);
     return dados;
   }, []);
@@ -36,7 +34,6 @@ export default function AutenticacaoProvider({ children }) {
       await autenticacaoApi.sair();
     } finally {
       setUsuario(null);
-      await renovarCsrf();
     }
   }, []);
 

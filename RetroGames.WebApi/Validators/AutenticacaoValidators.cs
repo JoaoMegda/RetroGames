@@ -3,9 +3,9 @@ using RetroGames.WebApi.ApiModels;
 
 namespace RetroGames.WebApi.Validators;
 
-public class AutenticarUsuarioRequestValidator : AbstractValidator<AutenticarUsuarioRequestApiModel>
+public class LoginRequestValidator : AbstractValidator<LoginRequestApiModel>
 {
-    public AutenticarUsuarioRequestValidator()
+    public LoginRequestValidator()
     {
         RuleFor(x => x.Email).NotEmpty().WithMessage("Informe o e-mail.")
             .EmailAddress().WithMessage("E-mail inválido.");

@@ -1,10 +1,7 @@
 using DotNetEnv;
 using FluentValidation;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using RetroGames.Model;
 using RetroGames.Model.Constantes;
-using RetroGames.Model.Model;
 using RetroGames.Services;
 using RetroGames.WebApi.ApiModels;
 using RetroGames.WebApi.Configuracao;
@@ -27,11 +24,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUsuarioAtualService, UsuarioAtualService>();
 
 builder.Services
-    .AddControllersWithViews(opcoes =>
-    {
-        opcoes.Filters.Add<FluentValidationFilter>();
-        opcoes.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()); // RS02
-    })
+    .AddControllers(opcoes => opcoes.Filters.Add<FluentValidationFilter>())
     .ConfigureApiBehaviorOptions(opcoes =>
     {
         opcoes.SuppressModelStateInvalidFilter = true;
@@ -42,43 +35,7 @@ builder.Services
 
 builder.Services.AddValidatorsFromAssemblyContaining<InserirPlataformaRequestValidator>();
 
-builder.Services.AddAntiforgery(opcoes =>
-{
-    opcoes.HeaderName = "X-CSRF-TOKEN";
-    opcoes.Cookie.Name = "retrogames.antiforgery";
-    opcoes.Cookie.SameSite = SameSiteMode.Strict;
-    opcoes.Cookie.HttpOnly = true;
-    opcoes.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
-        ? CookieSecurePolicy.SameAsRequest
-        : CookieSecurePolicy.Always;
-});
-
-// RS01: cookie HttpOnly, SameSite=Strict, expiração deslizante de 2 horas
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(opcoes =>
-    {
-        opcoes.Cookie.Name = "retrogames.sessao";
-        opcoes.Cookie.HttpOnly = true;
-        opcoes.Cookie.SameSite = SameSiteMode.Strict;
-        opcoes.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
-            ? CookieSecurePolicy.SameAsRequest
-            : CookieSecurePolicy.Always;
-        opcoes.ExpireTimeSpan = TimeSpan.FromHours(2);
-        opcoes.SlidingExpiration = true;
-        opcoes.Events.OnRedirectToLogin = contexto =>
-        {
-            contexto.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return contexto.Response.WriteAsJsonAsync(EnvelopeApiModel.Erro(ResponseCodes.NAO_AUTENTICADO));
-        };
-        opcoes.Events.OnRedirectToAccessDenied = contexto =>
-        {
-            contexto.Response.StatusCode = StatusCodes.Status403Forbidden;
-            return contexto.Response.WriteAsJsonAsync(EnvelopeApiModel.Erro(ResponseCodes.ACESSO_NEGADO));
-        };
-    });
-
-// RS03
+builder.Services.AdicionarAutenticacao(builder.Environment.IsDevelopment());
 builder.Services.AddAuthorization(opcoes =>
     opcoes.AddPolicy("SomenteAdministrador", politica => politica.RequireRole(Perfis.NomeAdministrador)));
 
