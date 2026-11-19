@@ -1,6 +1,6 @@
 # RetroGames — back-end (base)
 
-Parte 1: banco, API em camadas e um teste de exemplo. O front-end (`retrogames.web`) ainda não foi gerado.
+Banco MySQL, API em camadas, testes e front-end React (`retrogames.web`).
 
 ## Montar a solução (na raiz do repositório)
 
@@ -21,11 +21,27 @@ Se algum pacote não restaurar na versão indicada nos `.csproj`, ajuste para a 
 3. `dotnet run --project RetroGames.WebApi` → API em http://localhost:5080, Swagger em /swagger.
 4. `dotnet test` na raiz.
 
-## Como verificar
+## Conferência da Aula 6
 
-- `GET /api/Plataforma` → `{ "responseCode": 0, "data": [], "errorMessage": null }`
-- `POST /api/Plataforma` sem login → 401 (responseCode 4)
-- `GET /api/Autenticacao/csrf` → cookie `XSRF-TOKEN`; depois `POST /api/Autenticacao/login` com o header `X-CSRF-TOKEN`.
+Abra o Swagger em `http://localhost:5080/swagger` em uma janela anônima. Use uma
+sessão sem login para as linhas que pedem acesso anônimo e um banco de
+desenvolvimento para a gravação de teste.
+
+| Requisição | HTTP | `responseCode` |
+| --- | ---: | --- |
+| `POST /api/Plataforma` sem login | 401 | 4 |
+| `POST /api/Autenticacao/login` com senha errada | 401 | 6 |
+| `POST /api/Autenticacao/login` com e-mail malformado | 400 | 3, com erros em `data` |
+| `POST /api/Autenticacao/login` com as credenciais do administrador | 200 | 0 |
+| `POST /api/Plataforma` após login como administrador | 201 | 0 |
+| `GET /api/Jogo?incluirInativos=true` sem login | 200 | 0, apenas jogos ativos |
+| `POST /api/Autenticacao/logout` e depois `GET /api/Autenticacao/eu` | 200 e 401 | 0 e 4 |
+
+Confira o cookie `retrogames.sessao` com `HttpOnly` e `SameSite=Strict` após
+entrar. Com um jogo inativo no banco, compare a listagem anônima com a do
+administrador usando `incluirInativos=true`. O detalhe do inativo responde 404 ao
+visitante e 200 ao administrador. Uma conta de teste com perfil Cliente recebe
+403, código 5, ao tentar gravar no catálogo.
 
 ## Front-end (`retrogames.web`)
 
@@ -35,4 +51,4 @@ npm install
 npm run dev      # http://localhost:5173 (o Vite encaminha /api para a API em :5080)
 ```
 
-Suba a API antes (veja acima). Login do administrador: o e-mail e a senha definidos em `AdminInicial__*` no `.env`.
+Suba a API antes (veja acima). Ela usa `AdminInicial__Email` e `AdminInicial__Senha` do `.env` para criar a primeira conta administrativa. Se o banco já tem um administrador, use as credenciais dessa conta.
