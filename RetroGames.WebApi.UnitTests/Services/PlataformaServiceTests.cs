@@ -1,12 +1,10 @@
 using Moq;
-using RetroGames.Model;
 using RetroGames.Model.Model;
 using RetroGames.Repository;
 using RetroGames.Services;
-using RetroGames.WebApi.ApiModels;
 using Xunit;
 
-namespace RetroGames.WebApi.UnitTests;
+namespace RetroGames.WebApi.UnitTests.Services;
 
 public class PlataformaServiceTests
 {
@@ -24,6 +22,22 @@ public class PlataformaServiceTests
 
     private static Plataforma NovaPlataforma(int id = 0) =>
         new() { Id = id, Nome = "Super Nintendo", Fabricante = "Nintendo", AnoLancamento = 1990 };
+
+    [Fact]
+    public async Task ObterAsync_IdInexistente_LancaPlataformaNaoEncontrada()
+    {
+        // Arrange
+        const int idInexistente = 42;
+        _plataformas.Setup(repositorio => repositorio.ObterPorIdAsync(idInexistente))
+            .ReturnsAsync((Plataforma?)null);
+
+        // Act
+        var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ObterAsync(idInexistente));
+
+        // Assert
+        Assert.Equal(BusinessErrors.PlataformaNaoEncontrada, erro.Erro);
+        _plataformas.Verify(repositorio => repositorio.ObterPorIdAsync(idInexistente), Times.Once);
+    }
 
     [Fact]
     public async Task InserirAsync_NomeJaCadastrado_LancaPlataformaNomeDuplicado()
