@@ -1,41 +1,51 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AutenticacaoContext } from './autenticacaoContext.js';
 import { autenticacaoApi } from '../api/servicos.js';
 
 export default function AutenticacaoProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
+  const consultaInicial = useRef(null);
 
-  // Ao iniciar, pergunta à API quem está logado (GET /api/Autenticacao/eu).
-  useEffect(() => {
-    let ativo = true;
-    autenticacaoApi
-      .eu()
-      .then((dados) => ativo && setUsuario(dados))
-      .catch(() => ativo && setUsuario(null))
-      .finally(() => ativo && setCarregando(false));
-    return () => { ativo = false; };
+  const atualizarUsuario = useCallback((dados) => {
+    // Uma mudança de sessão invalida a consulta inicial que ainda estiver em andamento.
+    consultaInicial.current?.abort();
+    consultaInicial.current = null;
+    setUsuario(dados);
+    setCarregando(false);
   }, []);
 
   useEffect(() => {
-    const limpar = () => setUsuario(null);
+    const consulta = new AbortController();
+    consultaInicial.current = consulta;
+    const limpar = () => atualizarUsuario(null);
     window.addEventListener('sessao:expirada', limpar);
-    return () => window.removeEventListener('sessao:expirada', limpar);
-  }, []);
+
+    autenticacaoApi.usuarioAtual(consulta.signal)
+      .catch(() => null)
+      .then((dados) => {
+        if (!consulta.signal.aborted) atualizarUsuario(dados);
+      });
+
+    return () => {
+      consulta.abort();
+      window.removeEventListener('sessao:expirada', limpar);
+    };
+  }, [atualizarUsuario]);
 
   const entrar = useCallback(async (email, senha) => {
     const dados = await autenticacaoApi.entrar(email, senha);
-    setUsuario(dados);
+    atualizarUsuario(dados);
     return dados;
-  }, []);
+  }, [atualizarUsuario]);
 
   const sair = useCallback(async () => {
     try {
       await autenticacaoApi.sair();
     } finally {
-      setUsuario(null);
+      atualizarUsuario(null);
     }
-  }, []);
+  }, [atualizarUsuario]);
 
   const valor = useMemo(
     () => ({
