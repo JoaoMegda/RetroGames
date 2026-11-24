@@ -1,3 +1,4 @@
+using System.Text.Json;
 using DotNetEnv;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -28,9 +29,19 @@ builder.Services
     .ConfigureApiBehaviorOptions(opcoes =>
     {
         opcoes.SuppressModelStateInvalidFilter = true;
-        opcoes.InvalidModelStateResponseFactory = _ => new ObjectResult(
-            EnvelopeApiModel.Erro(ResponseCodes.MODEL_STATE_INVALIDO))
-        { StatusCode = StatusCodes.Status400BadRequest };
+        opcoes.InvalidModelStateResponseFactory = contexto =>
+        {
+            // O caminho do JSON identifica o campo que falhou na conversão, como $.anoLancamento.
+            var erros = contexto.ModelState
+                .Where(campo => campo.Value?.Errors.Count > 0 && campo.Key.StartsWith("$.", StringComparison.Ordinal))
+                .Select(campo => JsonNamingPolicy.CamelCase.ConvertName(campo.Key[2..].Split(new[] { '.', '[' })[0]))
+                .Distinct()
+                .ToDictionary(campo => campo, _ => new[] { "Informe um valor válido." });
+
+            return new ObjectResult(EnvelopeApiModel.Erro(
+                ResponseCodes.MODEL_STATE_INVALIDO, erros.Count > 0 ? erros : null))
+            { StatusCode = StatusCodes.Status400BadRequest };
+        };
     });
 
 builder.Services.AddValidatorsFromAssemblyContaining<InserirPlataformaRequestValidator>();

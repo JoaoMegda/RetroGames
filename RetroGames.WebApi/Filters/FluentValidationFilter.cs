@@ -36,7 +36,7 @@ public class FluentValidationFilter : IAsyncActionFilter
             return;
         }
 
-        // Erros de binding (por exemplo, pagina=abc ou JSON inválido) usam o envelope genérico do código 3.
+        // A API usa o código 3 e inclui os campos identificados durante a conversão do JSON.
         if (!context.ModelState.IsValid)
         {
             context.Result = _opcoesApi.Value.InvalidModelStateResponseFactory(context);
