@@ -12,9 +12,9 @@ export default function CardJogo({ jogo }) {
         <p className="text-muted small mb-1">
           {jogo.anoLancamento} · {jogo.descricaoCondicao}
         </p>
-        <p className="small mb-3">
-          {jogo.generos.map((g) => (
-            <span key={g.id} className="badge text-bg-secondary me-1">{g.nome}</span>
+        <p className="d-flex flex-wrap gap-1 mb-3">
+          {jogo.generos.map((genero) => (
+            <span key={genero} className="badge text-bg-secondary">{genero}</span>
           ))}
         </p>
         <div className="mt-auto d-flex justify-content-between align-items-center">

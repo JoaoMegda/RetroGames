@@ -7,10 +7,10 @@ export default function RotaProtegida({ somenteAdministrador = false }) {
   const { carregando, estaAutenticado, ehAdministrador } = useAutenticacao();
   const local = useLocation();
 
-  if (carregando) return <Carregando />;
+  if (carregando) return <Carregando texto="Verificando sessão..." />;
 
   if (!estaAutenticado) {
-    const voltarPara = encodeURIComponent(local.pathname + local.search);
+    const voltarPara = encodeURIComponent(local.pathname + local.search + local.hash);
     return <Navigate to={`/login?voltarPara=${voltarPara}`} replace />;
   }
 

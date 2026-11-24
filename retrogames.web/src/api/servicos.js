@@ -4,7 +4,7 @@ import api from './api.js';
 const dados = (promessa) => promessa.then((resposta) => resposta.data.data);
 
 export const autenticacaoApi = {
-  eu: () => dados(api.get('/Autenticacao/eu')),
+  usuarioAtual: (sinal) => dados(api.get('/Autenticacao/eu', { signal: sinal })),
   entrar: (email, senha) => dados(api.post('/Autenticacao/login', { email, senha })),
   sair: () => dados(api.post('/Autenticacao/logout')),
 };
@@ -27,7 +27,7 @@ export const condicaoJogoApi = {
 
 export const jogoApi = {
   listar: (parametros) => dados(api.get('/Jogo', { params: parametros })),
-  consultar: (id) => dados(api.get(`/Jogo/${id}`)),
+  buscarPorId: (id) => dados(api.get(`/Jogo/${id}`)),
   inserir: (jogo) => dados(api.post('/Jogo', jogo)),
   alterar: (id, jogo) => dados(api.put(`/Jogo/${id}`, jogo)),
   desativar: (id) => dados(api.delete(`/Jogo/${id}`)),

@@ -1,15 +1,27 @@
 import { useState } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAutenticacao } from '../hooks/useAutenticacao.js';
-import { obterErrosDosCampos, obterMensagemErro } from '../api/erros.js';
+import { Navigate, useSearchParams } from 'react-router-dom';
+import { useAutenticacao } from '../../hooks/useAutenticacao.js';
+import { obterErrosDosCampos, obterMensagemErro } from '../../api/erros.js';
+
+function obterDestinoInterno(voltarPara) {
+  if (!voltarPara?.startsWith('/')) return '/';
+
+  const origem = window.location.origin;
+  try {
+    const destino = new URL(voltarPara, origem);
+    if (destino.origin === origem && !destino.pathname.startsWith('//')) {
+      return destino.pathname + destino.search + destino.hash;
+    }
+  } catch {
+    return '/';
+  }
+  return '/';
+}
 
 export default function Login() {
   const { entrar, estaAutenticado, carregando } = useAutenticacao();
-  const navegar = useNavigate();
   const [params] = useSearchParams();
-  const voltarPara = params.get('voltarPara');
-  // Só aceita caminhos internos, para não redirecionar o usuário a outro site.
-  const destino = voltarPara && voltarPara.startsWith('/') && !voltarPara.startsWith('//') ? voltarPara : '/';
+  const destino = obterDestinoInterno(params.get('voltarPara'));
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -26,7 +38,6 @@ export default function Login() {
     setEnviando(true);
     try {
       await entrar(email, senha);
-      navegar(destino, { replace: true });
     } catch (e) {
       setErrosCampos(obterErrosDosCampos(e));
       setErro(obterMensagemErro(e));
@@ -46,14 +57,14 @@ export default function Login() {
             <input id="email" type="email" autoComplete="username"
                    className={`form-control ${errosCampos.email ? 'is-invalid' : ''}`}
                    value={email} onChange={(e) => setEmail(e.target.value)} />
-            {errosCampos.email && <div className="invalid-feedback">{errosCampos.email.join(' ')}</div>}
+            {errosCampos.email && <div className="invalid-feedback">{errosCampos.email}</div>}
           </div>
           <div className="mb-3">
             <label className="form-label" htmlFor="senha">Senha</label>
             <input id="senha" type="password" autoComplete="current-password"
                    className={`form-control ${errosCampos.senha ? 'is-invalid' : ''}`}
                    value={senha} onChange={(e) => setSenha(e.target.value)} />
-            {errosCampos.senha && <div className="invalid-feedback">{errosCampos.senha.join(' ')}</div>}
+            {errosCampos.senha && <div className="invalid-feedback">{errosCampos.senha}</div>}
           </div>
           <button className="btn btn-dark w-100" type="submit" disabled={enviando}>
             {enviando ? 'Entrando...' : 'Entrar'}

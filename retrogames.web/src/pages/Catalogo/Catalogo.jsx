@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { generoApi, jogoApi, plataformaApi } from '../api/servicos.js';
-import { obterMensagemErro } from '../api/erros.js';
-import CardJogo from '../components/CardJogo.jsx';
-import Paginacao from '../components/Paginacao.jsx';
-import { Carregando, EstadoVazio, MensagemErro } from '../components/MensagensEstado.jsx';
+import { generoApi, jogoApi, plataformaApi } from '../../api/servicos.js';
+import { obterMensagemErro } from '../../api/erros.js';
+import CardJogo from '../../components/CardJogo.jsx';
+import Paginacao from '../../components/Paginacao.jsx';
+import { Carregando, EstadoVazio, MensagemErro } from '../../components/MensagensEstado.jsx';
 
 const TAMANHO_PAGINA = 12;
 
@@ -13,38 +13,53 @@ export default function Catalogo() {
   const busca = params.get('busca') ?? '';
   const idPlataforma = params.get('idPlataforma') ?? '';
   const idGenero = params.get('idGenero') ?? '';
-  const pagina = Number(params.get('pagina') ?? 1) || 1;
+  const numeroPagina = Number(params.get('pagina'));
+  const pagina = Number.isSafeInteger(numeroPagina) && numeroPagina > 0 ? numeroPagina : 1;
 
   const [textoBusca, setTextoBusca] = useState(busca);
-  const [plataformas, setPlataformas] = useState([]);
-  const [generos, setGeneros] = useState([]);
+  const [{ plataformas, generos }, setOpcoes] = useState({ plataformas: [], generos: [] });
   const [resultado, setResultado] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
+  const [tentativa, setTentativa] = useState(0);
+  const consultaOpcoes = useRef(null);
 
   useEffect(() => {
-    Promise.all([plataformaApi.listar(), generoApi.listar()])
-      .then(([p, g]) => { setPlataformas(p); setGeneros(g); })
-      .catch(() => { /* os filtros ficam vazios; a lista de jogos mostra o erro, se houver */ });
-  }, []);
+    setTextoBusca(busca);
+  }, [busca]);
 
-  const carregar = useCallback(() => {
+  useEffect(() => {
+    let vigente = true;
     setCarregando(true);
     setErro(null);
-    jogoApi
-      .listar({
-        busca: busca || undefined,
-        idPlataforma: idPlataforma || undefined,
-        idGenero: idGenero || undefined,
-        pagina,
-        tamanhoPagina: TAMANHO_PAGINA,
-      })
-      .then(setResultado)
-      .catch((e) => setErro(obterMensagemErro(e)))
-      .finally(() => setCarregando(false));
-  }, [busca, idPlataforma, idGenero, pagina]);
 
-  useEffect(() => { carregar(); }, [carregar]);
+    // As opções dos filtros são reaproveitadas enquanto o catálogo está aberto.
+    consultaOpcoes.current ??= Promise.all([plataformaApi.listar(), generoApi.listar()])
+      .then(([plataformas, generos]) => ({ plataformas, generos }))
+      .catch((falha) => {
+        consultaOpcoes.current = null;
+        throw falha;
+      });
+
+    const carregarOpcoes = consultaOpcoes.current.then((opcoes) => {
+      if (vigente) setOpcoes(opcoes);
+    });
+    const carregarJogos = jogoApi.listar({
+      busca: busca || undefined,
+      idPlataforma: idPlataforma || undefined,
+      idGenero: idGenero || undefined,
+      pagina,
+      tamanhoPagina: TAMANHO_PAGINA,
+    });
+
+    Promise.all([carregarOpcoes, carregarJogos])
+      .then(([, jogos]) => { if (vigente) setResultado(jogos); })
+      .catch((falha) => { if (vigente) setErro(obterMensagemErro(falha)); })
+      .finally(() => { if (vigente) setCarregando(false); });
+
+    // Uma resposta atrasada pertence à URL anterior e não deve atualizar a tela.
+    return () => { vigente = false; };
+  }, [busca, idPlataforma, idGenero, pagina, tentativa]);
 
   // Filtros e página ficam na query string.
   function atualizar(mudancas) {
@@ -89,7 +104,7 @@ export default function Catalogo() {
       </form>
 
       {carregando && <Carregando />}
-      {!carregando && erro && <MensagemErro mensagem={erro} aoTentarNovamente={carregar} />}
+      {!carregando && erro && <MensagemErro mensagem={erro} aoTentarNovamente={() => setTentativa(tentativa + 1)} />}
       {!carregando && !erro && resultado && (
         resultado.itens.length === 0 ? (
           <EstadoVazio titulo="Nenhum jogo encontrado">Ajuste a busca ou os filtros.</EstadoVazio>

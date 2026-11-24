@@ -1,32 +1,35 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { jogoApi } from '../api/servicos.js';
-import { obterMensagemErro } from '../api/erros.js';
-import { formatarPreco } from '../lib/formato.js';
-import { Carregando, MensagemErro } from '../components/MensagensEstado.jsx';
+import { jogoApi } from '../../api/servicos.js';
+import { obterMensagemErro } from '../../api/erros.js';
+import { formatarPreco } from '../../lib/formato.js';
+import { Carregando, MensagemErro } from '../../components/MensagensEstado.jsx';
 
 export default function DetalheJogo() {
   const { id } = useParams();
-  const [jogo, setJogo] = useState(null);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState(null);
+  const [consulta, setConsulta] = useState(null);
+  const [tentativa, setTentativa] = useState(0);
 
-  const carregar = useCallback(() => {
-    setCarregando(true);
-    setErro(null);
-    jogoApi.consultar(id)
-      .then(setJogo)
-      .catch((e) => setErro(obterMensagemErro(e)))
-      .finally(() => setCarregando(false));
-  }, [id]);
+  useEffect(() => {
+    let vigente = true;
+    jogoApi.buscarPorId(id)
+      .then((jogo) => {
+        if (vigente) setConsulta({ id, tentativa, jogo });
+      })
+      .catch((falha) => {
+        if (vigente) setConsulta({ id, tentativa, erro: obterMensagemErro(falha) });
+      });
 
-  useEffect(() => { carregar(); }, [carregar]);
+    return () => { vigente = false; };
+  }, [id, tentativa]);
 
-  if (carregando) return <Carregando />;
+  if (!consulta || consulta.id !== id || consulta.tentativa !== tentativa) return <Carregando />;
+
+  const { jogo, erro } = consulta;
   if (erro) {
     return (
       <>
-        <MensagemErro mensagem={erro} aoTentarNovamente={carregar} />
+        <MensagemErro mensagem={erro} aoTentarNovamente={() => setTentativa((anterior) => anterior + 1)} />
         <Link to="/">Voltar ao catálogo</Link>
       </>
     );

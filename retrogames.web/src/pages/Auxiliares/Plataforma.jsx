@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import { plataformaApi } from '../api/servicos.js';
-import { obterErrosDosCampos, obterMensagemErro } from '../api/erros.js';
-import { Carregando, EstadoVazio, MensagemErro } from '../components/MensagensEstado.jsx';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { plataformaApi } from '../../api/servicos.js';
+import { obterErrosDosCampos, obterMensagemErro } from '../../api/erros.js';
+import { Carregando, EstadoVazio, MensagemErro } from '../../components/MensagensEstado.jsx';
 
 const VAZIO = { nome: '', fabricante: '', anoLancamento: '' };
 
@@ -15,17 +15,28 @@ export default function Plataforma() {
   const [erro, setErro] = useState(null);
   const [errosCampos, setErrosCampos] = useState({});
   const [enviando, setEnviando] = useState(false);
+  const [idExclusao, setIdExclusao] = useState(null);
+  const gravando = enviando || idExclusao !== null;
+  const ultimaConsulta = useRef(0);
 
-  const carregar = useCallback(() => {
+  const carregar = useCallback(async () => {
+    const consulta = ++ultimaConsulta.current;
     setCarregando(true);
     setErroCarga(null);
-    plataformaApi.listar()
-      .then(setPlataformas)
-      .catch((e) => setErroCarga(obterMensagemErro(e)))
-      .finally(() => setCarregando(false));
+    try {
+      const lista = await plataformaApi.listar();
+      if (consulta === ultimaConsulta.current) setPlataformas(lista);
+    } catch (falha) {
+      if (consulta === ultimaConsulta.current) setErroCarga(obterMensagemErro(falha));
+    } finally {
+      if (consulta === ultimaConsulta.current) setCarregando(false);
+    }
   }, []);
 
-  useEffect(() => { carregar(); }, [carregar]);
+  useEffect(() => {
+    carregar();
+    return () => { ultimaConsulta.current += 1; };
+  }, [carregar]);
 
   const alterar = (campo) => (e) => setForm((f) => ({ ...f, [campo]: e.target.value }));
 
@@ -45,6 +56,8 @@ export default function Plataforma() {
 
   async function aoEnviar(evento) {
     evento.preventDefault();
+    if (carregando || gravando) return;
+
     setErro(null);
     setErrosCampos({});
     setEnviando(true);
@@ -52,7 +65,7 @@ export default function Plataforma() {
     try {
       if (idEdicao) await plataformaApi.alterar(idEdicao, corpo); else await plataformaApi.inserir(corpo);
       limpar();
-      carregar();
+      await carregar();
     } catch (e) {
       setErrosCampos(obterErrosDosCampos(e));
       setErro(obterMensagemErro(e));
@@ -62,19 +75,23 @@ export default function Plataforma() {
   }
 
   async function excluir(p) {
-    if (!window.confirm(`Excluir a plataforma "${p.nome}"?`)) return;
+    if (gravando || !window.confirm(`Excluir a plataforma "${p.nome}"?`)) return;
+
+    setIdExclusao(p.id);
     setErro(null);
     try {
       await plataformaApi.excluir(p.id);
       if (idEdicao === p.id) limpar();
-      carregar();
+      await carregar();
     } catch (e) {
       setErro(obterMensagemErro(e));
+    } finally {
+      setIdExclusao(null);
     }
   }
 
   const classe = (campo) => `form-control ${errosCampos[campo] ? 'is-invalid' : ''}`;
-  const feedback = (campo) => errosCampos[campo] && <div className="invalid-feedback">{errosCampos[campo].join(' ')}</div>;
+  const feedback = (campo) => errosCampos[campo] && <div className="invalid-feedback">{errosCampos[campo]}</div>;
 
   return (
     <>
@@ -86,23 +103,23 @@ export default function Plataforma() {
         <div className="row g-3">
           <div className="col-md-4">
             <label className="form-label" htmlFor="nome">Nome</label>
-            <input id="nome" className={classe('nome')} value={form.nome} onChange={alterar('nome')} />
+            <input id="nome" className={classe('nome')} value={form.nome} onChange={alterar('nome')} disabled={gravando} />
             {feedback('nome')}
           </div>
           <div className="col-md-4">
             <label className="form-label" htmlFor="fabricante">Fabricante</label>
-            <input id="fabricante" className={classe('fabricante')} value={form.fabricante} onChange={alterar('fabricante')} />
+            <input id="fabricante" className={classe('fabricante')} value={form.fabricante} onChange={alterar('fabricante')} disabled={gravando} />
             {feedback('fabricante')}
           </div>
           <div className="col-md-4">
             <label className="form-label" htmlFor="ano">Ano de lançamento</label>
-            <input id="ano" type="number" className={classe('anoLancamento')} value={form.anoLancamento} onChange={alterar('anoLancamento')} />
+            <input id="ano" type="number" className={classe('anoLancamento')} value={form.anoLancamento} onChange={alterar('anoLancamento')} disabled={gravando} />
             {feedback('anoLancamento')}
           </div>
         </div>
         <div className="mt-3 d-flex gap-2">
-          <button className="btn btn-dark" type="submit" disabled={enviando}>{enviando ? 'Salvando...' : 'Salvar'}</button>
-          {idEdicao && <button type="button" className="btn btn-outline-secondary" onClick={limpar}>Cancelar</button>}
+          <button className="btn btn-dark" type="submit" disabled={carregando || gravando}>{enviando ? 'Salvando...' : 'Salvar'}</button>
+          {idEdicao && <button type="button" className="btn btn-outline-secondary" onClick={limpar} disabled={gravando}>Cancelar</button>}
         </div>
       </form>
 
@@ -124,8 +141,10 @@ export default function Plataforma() {
                     <td>{p.fabricante}</td>
                     <td>{p.anoLancamento}</td>
                     <td className="text-end text-nowrap">
-                      <button type="button" className="btn btn-sm btn-outline-dark me-1" onClick={() => editar(p)}>Editar</button>
-                      <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => excluir(p)}>Excluir</button>
+                      <button type="button" className="btn btn-sm btn-outline-dark me-1" onClick={() => editar(p)} disabled={gravando}>Editar</button>
+                      <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => excluir(p)} disabled={gravando}>
+                        {idExclusao === p.id ? 'Excluindo...' : 'Excluir'}
+                      </button>
                     </td>
                   </tr>
                 ))}

@@ -1,35 +1,45 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { jogoApi } from '../api/servicos.js';
-import { obterMensagemErro } from '../api/erros.js';
-import { formatarPreco } from '../lib/formato.js';
-import Paginacao from '../components/Paginacao.jsx';
-import { Carregando, EstadoVazio, MensagemErro } from '../components/MensagensEstado.jsx';
+import { jogoApi } from '../../api/servicos.js';
+import { obterMensagemErro } from '../../api/erros.js';
+import { formatarPreco } from '../../lib/formato.js';
+import Paginacao from '../../components/Paginacao.jsx';
+import { Carregando, EstadoVazio, MensagemErro } from '../../components/MensagensEstado.jsx';
 
 const TAMANHO_PAGINA = 10;
 
 export default function Jogos() {
   const [params, setParams] = useSearchParams();
   const busca = params.get('busca') ?? '';
-  const pagina = Number(params.get('pagina') ?? 1) || 1;
+  const numeroPagina = Number(params.get('pagina'));
+  const pagina = Number.isSafeInteger(numeroPagina) && numeroPagina > 0 ? numeroPagina : 1;
 
   const [textoBusca, setTextoBusca] = useState(busca);
   const [resultado, setResultado] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
   const [erroAcao, setErroAcao] = useState(null);
+  const [idDesativando, setIdDesativando] = useState(null);
+  const [tentativa, setTentativa] = useState(0);
 
-  const carregar = useCallback(() => {
+  useEffect(() => {
+    setTextoBusca(busca);
+  }, [busca]);
+
+  useEffect(() => {
+    let vigente = true;
     setCarregando(true);
     setErro(null);
     jogoApi
       .listar({ busca: busca || undefined, pagina, tamanhoPagina: TAMANHO_PAGINA, incluirInativos: true })
-      .then(setResultado)
-      .catch((e) => setErro(obterMensagemErro(e)))
-      .finally(() => setCarregando(false));
-  }, [busca, pagina]);
+      .then((dados) => { if (vigente) setResultado(dados); })
+      .catch((falha) => { if (vigente) setErro(obterMensagemErro(falha)); })
+      .finally(() => { if (vigente) setCarregando(false); });
 
-  useEffect(() => { carregar(); }, [carregar]);
+    return () => { vigente = false; };
+  }, [busca, pagina, tentativa]);
+
+  const recarregar = () => setTentativa((anterior) => anterior + 1);
 
   function atualizar(mudancas) {
     const novo = new URLSearchParams(params);
@@ -40,13 +50,18 @@ export default function Jogos() {
   }
 
   async function desativar(jogo) {
+    if (idDesativando !== null) return;
     if (!window.confirm(`Desativar "${jogo.nome}"? O jogo deixa de aparecer no catálogo público.`)) return;
+
+    setIdDesativando(jogo.id);
     setErroAcao(null);
     try {
       await jogoApi.desativar(jogo.id);
-      carregar();
+      recarregar();
     } catch (e) {
       setErroAcao(obterMensagemErro(e));
+    } finally {
+      setIdDesativando(null);
     }
   }
 
@@ -65,7 +80,7 @@ export default function Jogos() {
 
       {erroAcao && <div className="alert alert-danger" role="alert">{erroAcao}</div>}
       {carregando && <Carregando />}
-      {!carregando && erro && <MensagemErro mensagem={erro} aoTentarNovamente={carregar} />}
+      {!carregando && erro && <MensagemErro mensagem={erro} aoTentarNovamente={recarregar} />}
       {!carregando && !erro && resultado && (
         resultado.itens.length === 0 ? (
           <EstadoVazio titulo="Nenhum jogo encontrado" />
@@ -93,8 +108,10 @@ export default function Jogos() {
                         : <span className="badge text-bg-secondary">Inativo</span>}</td>
                       <td className="text-end text-nowrap">
                         <Link to={`/admin/jogos/${jogo.id}/editar`} className="btn btn-sm btn-outline-dark me-1">Editar</Link>
-                        <button type="button" className="btn btn-sm btn-outline-danger" disabled={!jogo.ativo}
-                                onClick={() => desativar(jogo)}>Desativar</button>
+                        <button type="button" className="btn btn-sm btn-outline-danger" disabled={!jogo.ativo || idDesativando !== null}
+                                onClick={() => desativar(jogo)}>
+                          {idDesativando === jogo.id ? 'Desativando...' : 'Desativar'}
+                        </button>
                       </td>
                     </tr>
                   ))}
