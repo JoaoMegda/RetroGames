@@ -1,13 +1,29 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { obterMensagemErro } from '../api/erros.js';
 import { useAutenticacao } from '../hooks/useAutenticacao.js';
+import { MensagemErro } from './MensagensEstado.jsx';
 
 export default function Layout() {
   const { estaAutenticado, ehAdministrador, usuario, sair } = useAutenticacao();
-  const navegar = useNavigate();
+  const { pathname } = useLocation();
+  const [saindo, setSaindo] = useState(false);
+  const [erroSaida, setErroSaida] = useState(null);
+  const voltarAoCatalogo = saindo && !estaAutenticado;
+
+  useEffect(() => {
+    if (voltarAoCatalogo && pathname === '/') setSaindo(false);
+  }, [pathname, voltarAoCatalogo]);
 
   async function aoSair() {
-    await sair().catch(() => {});
-    navegar('/');
+    setErroSaida(null);
+    setSaindo(true);
+    try {
+      await sair();
+    } catch (falha) {
+      setErroSaida(obterMensagemErro(falha));
+      setSaindo(false);
+    }
   }
 
   return (
@@ -26,9 +42,9 @@ export default function Layout() {
               </li>
               {ehAdministrador && (
                 <li className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <button type="button" className="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     Administração
-                  </a>
+                  </button>
                   <ul className="dropdown-menu">
                     <li><Link className="dropdown-item" to="/admin/jogos">Jogos</Link></li>
                     <li><Link className="dropdown-item" to="/admin/plataformas">Plataformas</Link></li>
@@ -39,8 +55,10 @@ export default function Layout() {
             <div className="d-flex align-items-center gap-2">
               {estaAutenticado ? (
                 <>
-                  <span className="navbar-text">{usuario.nome}</span>
-                  <button type="button" className="btn btn-outline-light btn-sm" onClick={aoSair}>Sair</button>
+                  <span className="navbar-text">Olá, {usuario.nome}</span>
+                  <button type="button" className="btn btn-outline-light btn-sm" onClick={aoSair} disabled={saindo}>
+                    {saindo ? 'Saindo...' : 'Sair'}
+                  </button>
                 </>
               ) : (
                 <Link className="btn btn-outline-light btn-sm" to="/login">Entrar</Link>
@@ -50,7 +68,8 @@ export default function Layout() {
         </div>
       </nav>
       <main className="container flex-grow-1 py-4">
-        <Outlet />
+        {estaAutenticado && erroSaida && <MensagemErro mensagem={erroSaida} aoTentarNovamente={aoSair} />}
+        {voltarAoCatalogo && pathname !== '/' ? <Navigate to="/" replace /> : <Outlet />}
       </main>
       <footer className="border-top py-3 text-body-secondary">
         <div className="container small">RetroGames</div>

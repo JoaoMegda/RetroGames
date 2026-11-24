@@ -3,7 +3,7 @@ import Layout from './components/Layout.jsx';
 import RotaProtegida from './components/RotaProtegida.jsx';
 import Catalogo from './pages/Catalogo/Catalogo.jsx';
 import DetalheJogo from './pages/Catalogo/DetalheJogo.jsx';
-import Login from './pages/Login.jsx';
+import Login from './pages/Login/Login.jsx';
 import Jogos from './pages/Jogos.jsx';
 import FormularioJogo from './pages/FormularioJogo.jsx';
 import Plataforma from './pages/Plataforma.jsx';

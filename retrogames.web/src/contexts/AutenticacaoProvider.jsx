@@ -42,9 +42,10 @@ export default function AutenticacaoProvider({ children }) {
   const sair = useCallback(async () => {
     try {
       await autenticacaoApi.sair();
-    } finally {
-      atualizarUsuario(null);
+    } catch (falha) {
+      if (falha?.response?.status !== 401) throw falha;
     }
+    atualizarUsuario(null);
   }, [atualizarUsuario]);
 
   const valor = useMemo(
