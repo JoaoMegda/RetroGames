@@ -57,14 +57,14 @@ export default function Login() {
             <input id="email" type="email" autoComplete="username"
                    className={`form-control ${errosCampos.email ? 'is-invalid' : ''}`}
                    value={email} onChange={(e) => setEmail(e.target.value)} />
-            {errosCampos.email && <div className="invalid-feedback">{errosCampos.email.join(' ')}</div>}
+            {errosCampos.email && <div className="invalid-feedback">{errosCampos.email}</div>}
           </div>
           <div className="mb-3">
             <label className="form-label" htmlFor="senha">Senha</label>
             <input id="senha" type="password" autoComplete="current-password"
                    className={`form-control ${errosCampos.senha ? 'is-invalid' : ''}`}
                    value={senha} onChange={(e) => setSenha(e.target.value)} />
-            {errosCampos.senha && <div className="invalid-feedback">{errosCampos.senha.join(' ')}</div>}
+            {errosCampos.senha && <div className="invalid-feedback">{errosCampos.senha}</div>}
           </div>
           <button className="btn btn-dark w-100" type="submit" disabled={enviando}>
             {enviando ? 'Entrando...' : 'Entrar'}

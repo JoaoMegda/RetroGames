@@ -90,7 +90,7 @@ export default function FormularioJogo() {
     }
   }
 
-  const feedback = (campo) => errosCampos[campo] && <div className="invalid-feedback d-block">{errosCampos[campo].join(' ')}</div>;
+  const feedback = (campo) => errosCampos[campo] && <div className="invalid-feedback d-block">{errosCampos[campo]}</div>;
   const classe = (campo) => `form-control ${errosCampos[campo] ? 'is-invalid' : ''}`;
   const classeSelect = (campo) => `form-select ${errosCampos[campo] ? 'is-invalid' : ''}`;
 

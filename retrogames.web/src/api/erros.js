@@ -8,8 +8,13 @@ export function obterMensagemErro(erro) {
   return resposta?.data?.errorMessage ?? (falhaDeConexao ? MENSAGEM_CONEXAO : MENSAGEM_PADRAO);
 }
 
-/** Erros por campo (responseCode 3): { nome: ['Informe o nome.'], ... }. Vazio nos demais casos. */
+/** Converte as listas de validação da API em um texto por campo do formulário. */
 export function obterErrosDosCampos(erro) {
   const corpo = erro?.response?.data;
-  return corpo?.responseCode === 3 && corpo.data ? corpo.data : {};
+  if (corpo?.responseCode !== 3 || !corpo.data) return {};
+
+  return Object.fromEntries(Object.entries(corpo.data).map(([campo, mensagens]) => [
+    campo,
+    Array.isArray(mensagens) ? mensagens.join(' ') : mensagens,
+  ]));
 }

@@ -74,7 +74,7 @@ export default function Plataforma() {
   }
 
   const classe = (campo) => `form-control ${errosCampos[campo] ? 'is-invalid' : ''}`;
-  const feedback = (campo) => errosCampos[campo] && <div className="invalid-feedback">{errosCampos[campo].join(' ')}</div>;
+  const feedback = (campo) => errosCampos[campo] && <div className="invalid-feedback">{errosCampos[campo]}</div>;
 
   return (
     <>

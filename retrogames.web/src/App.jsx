@@ -19,11 +19,14 @@ export default function App() {
         <Route path="login" element={<Login />} />
 
         {/* restritas ao Administrador (a API é quem garante: 401/403) */}
-        <Route element={<RotaProtegida somenteAdministrador />}>
-          <Route path="admin/jogos" element={<Jogos />} />
-          <Route path="admin/jogos/novo" element={<FormularioJogo />} />
-          <Route path="admin/jogos/:id/editar" element={<FormularioJogo />} />
-          <Route path="admin/plataformas" element={<Plataforma />} />
+        <Route path="admin">
+          <Route index element={<NaoEncontrada />} />
+          <Route element={<RotaProtegida somenteAdministrador />}>
+            <Route path="jogos" element={<Jogos />} />
+            <Route path="jogos/novo" element={<FormularioJogo />} />
+            <Route path="jogos/:id/editar" element={<FormularioJogo />} />
+            <Route path="plataformas" element={<Plataforma />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NaoEncontrada />} />
