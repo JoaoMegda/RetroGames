@@ -6,7 +6,7 @@ import DetalheJogo from './pages/Catalogo/DetalheJogo.jsx';
 import Login from './pages/Login/Login.jsx';
 import Jogos from './pages/Jogos.jsx';
 import FormularioJogo from './pages/FormularioJogo.jsx';
-import Plataforma from './pages/Plataforma.jsx';
+import Plataforma from './pages/Auxiliares/Plataforma.jsx';
 import NaoEncontrada from './pages/NaoEncontrada.jsx';
 
 export default function App() {
