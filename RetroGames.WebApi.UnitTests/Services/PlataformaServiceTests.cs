@@ -9,15 +9,13 @@ namespace RetroGames.WebApi.UnitTests.Services;
 public class PlataformaServiceTests
 {
     private readonly Mock<IPlataformaRepository> _plataformas = new();
-    private readonly Mock<IJogoRepository> _jogos = new();
-    private readonly PlataformaService _service;
+    private readonly PlataformaService _servico;
 
     public PlataformaServiceTests()
     {
         var repositorios = new Mock<IRepositorySet>();
         repositorios.SetupGet(r => r.Plataforma).Returns(_plataformas.Object);
-        repositorios.SetupGet(r => r.Jogo).Returns(_jogos.Object);
-        _service = new PlataformaService(repositorios.Object);
+        _servico = new PlataformaService(repositorios.Object);
     }
 
     private static Plataforma NovaPlataforma(int id = 0) =>
@@ -32,54 +30,101 @@ public class PlataformaServiceTests
             .ReturnsAsync((Plataforma?)null);
 
         // Act
-        var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ObterAsync(idInexistente));
+        var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _servico.ObterAsync(idInexistente));
 
         // Assert
         Assert.Equal(BusinessErrors.PlataformaNaoEncontrada, erro.Erro);
         _plataformas.Verify(repositorio => repositorio.ObterPorIdAsync(idInexistente), Times.Once);
+        _plataformas.VerifyNoOtherCalls();
     }
 
     [Fact]
     public async Task InserirAsync_NomeJaCadastrado_LancaPlataformaNomeDuplicado()
     {
-        _plataformas.Setup(r => r.ExisteComNomeAsync("Super Nintendo", null)).ReturnsAsync(true);
+        // Arrange
+        var plataforma = NovaPlataforma();
+        _plataformas.Setup(r => r.ExisteComNomeAsync(plataforma.Nome, null)).ReturnsAsync(true);
 
-        var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.InserirAsync(NovaPlataforma()));
+        // Act
+        var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _servico.InserirAsync(plataforma));
 
-        Assert.Equal(BusinessErrors.PlataformaNomeDuplicado.Resposta.Code, erro.Erro.Resposta.Code);
+        // Assert
+        Assert.Equal(BusinessErrors.PlataformaNomeDuplicado, erro.Erro);
+        _plataformas.Verify(r => r.InserirAsync(It.IsAny<Plataforma>()), Times.Never);
     }
 
     [Fact]
-    public async Task InserirAsync_RepositorioRecusaPorUnique_LancaPlataformaNomeDuplicado()
+    public async Task InserirAsync_RepositorioLancaRegistroDuplicado_LancaPlataformaNomeDuplicado()
     {
-        _plataformas.Setup(r => r.ExisteComNomeAsync(It.IsAny<string>(), null)).ReturnsAsync(false);
-        _plataformas.Setup(r => r.InserirAsync(It.IsAny<Plataforma>())).ThrowsAsync(new RegistroDuplicadoException());
+        // Arrange
+        var plataforma = NovaPlataforma();
+        _plataformas.Setup(r => r.ExisteComNomeAsync(plataforma.Nome, null)).ReturnsAsync(false);
+        _plataformas.Setup(r => r.InserirAsync(plataforma)).ThrowsAsync(new RegistroDuplicadoException());
 
-        var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.InserirAsync(NovaPlataforma()));
+        // Act
+        var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _servico.InserirAsync(plataforma));
 
-        Assert.Equal(BusinessErrors.PlataformaNomeDuplicado.Resposta.Code, erro.Erro.Resposta.Code);
+        // Assert
+        Assert.Equal(BusinessErrors.PlataformaNomeDuplicado, erro.Erro);
+        _plataformas.Verify(r => r.InserirAsync(plataforma), Times.Once);
     }
 
     [Fact]
     public async Task InserirAsync_NomeNovo_RetornaPlataformaComIdGerado()
     {
-        _plataformas.Setup(r => r.ExisteComNomeAsync(It.IsAny<string>(), null)).ReturnsAsync(false);
-        _plataformas.Setup(r => r.InserirAsync(It.IsAny<Plataforma>())).ReturnsAsync(7);
+        // Arrange
+        const int idGerado = 7;
+        var plataforma = NovaPlataforma();
+        _plataformas.Setup(r => r.ExisteComNomeAsync(plataforma.Nome, null)).ReturnsAsync(false);
+        _plataformas.Setup(r => r.InserirAsync(plataforma)).ReturnsAsync(idGerado);
 
-        var resultado = await _service.InserirAsync(NovaPlataforma());
+        // Act
+        var resultado = await _servico.InserirAsync(plataforma);
 
-        Assert.Equal(7, resultado.Id);
+        // Assert
+        Assert.Equal(idGerado, resultado.Id);
+        _plataformas.Verify(r => r.InserirAsync(plataforma), Times.Once);
+    }
+
+    [Fact]
+    public async Task AlterarAsync_MantendoProprioNome_GravaAlteracao()
+    {
+        // Arrange
+        const int id = 7;
+        const string fabricanteNovo = "Nintendo do Brasil";
+        var cadastrada = NovaPlataforma(id);
+        var alteracao = NovaPlataforma(id);
+        alteracao.Fabricante = fabricanteNovo;
+
+        _plataformas.Setup(r => r.ObterPorIdAsync(id)).ReturnsAsync(cadastrada);
+        _plataformas.Setup(r => r.ExisteComNomeAsync(cadastrada.Nome, null)).ReturnsAsync(true);
+        _plataformas.Setup(r => r.ExisteComNomeAsync(cadastrada.Nome, id)).ReturnsAsync(false);
+        _plataformas.Setup(r => r.AlterarAsync(alteracao)).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _servico.AlterarAsync(alteracao);
+
+        // Assert
+        Assert.Equal(cadastrada.Nome, resultado.Nome);
+        Assert.Equal(fabricanteNovo, resultado.Fabricante);
+        _plataformas.Verify(r => r.ExisteComNomeAsync(cadastrada.Nome, id), Times.Once);
+        _plataformas.Verify(r => r.AlterarAsync(It.Is<Plataforma>(p =>
+            p.Id == id && p.Nome == cadastrada.Nome && p.Fabricante == fabricanteNovo)), Times.Once);
     }
 
     [Fact]
     public async Task ExcluirAsync_ComJogosVinculados_LancaPlataformaPossuiJogos()
     {
-        _plataformas.Setup(r => r.ObterPorIdAsync(1)).ReturnsAsync(NovaPlataforma(1));
-        _plataformas.Setup(r => r.PossuiJogosAsync(1)).ReturnsAsync(true);
+        // Arrange
+        const int id = 1;
+        _plataformas.Setup(r => r.ObterPorIdAsync(id)).ReturnsAsync(NovaPlataforma(id));
+        _plataformas.Setup(r => r.PossuiJogosAsync(id)).ReturnsAsync(true);
 
-        var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ExcluirAsync(1));
+        // Act
+        var erro = await Assert.ThrowsAsync<BusinessRuleException>(() => _servico.ExcluirAsync(id));
 
-        Assert.Equal(BusinessErrors.PlataformaPossuiJogos.Resposta.Code, erro.Erro.Resposta.Code);
+        // Assert
+        Assert.Equal(BusinessErrors.PlataformaPossuiJogos, erro.Erro);
         _plataformas.Verify(r => r.ExcluirAsync(It.IsAny<int>()), Times.Never);
     }
 }
