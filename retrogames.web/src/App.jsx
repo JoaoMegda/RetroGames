@@ -4,8 +4,8 @@ import RotaProtegida from './components/RotaProtegida.jsx';
 import Catalogo from './pages/Catalogo/Catalogo.jsx';
 import DetalheJogo from './pages/Catalogo/DetalheJogo.jsx';
 import Login from './pages/Login/Login.jsx';
-import Jogos from './pages/Jogos.jsx';
-import FormularioJogo from './pages/FormularioJogo.jsx';
+import Jogos from './pages/Administracao/Jogos.jsx';
+import FormularioJogo from './pages/Administracao/FormularioJogo.jsx';
 import Plataforma from './pages/Auxiliares/Plataforma.jsx';
 import NaoEncontrada from './pages/NaoEncontrada.jsx';
 

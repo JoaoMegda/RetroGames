@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { condicaoJogoApi, generoApi, jogoApi, plataformaApi } from '../api/servicos.js';
-import { obterErrosDosCampos, obterMensagemErro } from '../api/erros.js';
-import { Carregando, MensagemErro } from '../components/MensagensEstado.jsx';
+import { condicaoJogoApi, generoApi, jogoApi, plataformaApi } from '../../api/servicos.js';
+import { obterErrosDosCampos, obterMensagemErro } from '../../api/erros.js';
+import { Carregando, MensagemErro } from '../../components/MensagensEstado.jsx';
 
 const VAZIO = {
   nome: '', descricao: '', anoLancamento: '', preco: '', estoque: '',
@@ -18,36 +18,38 @@ export default function FormularioJogo() {
   const [plataformas, setPlataformas] = useState([]);
   const [condicoes, setCondicoes] = useState([]);
   const [generos, setGeneros] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [erroCarga, setErroCarga] = useState(null);
+  const [carga, setCarga] = useState(null);
   const [erro, setErro] = useState(null);
   const [errosCampos, setErrosCampos] = useState({});
   const [enviando, setEnviando] = useState(false);
+  const [tentativa, setTentativa] = useState(0);
 
   useEffect(() => {
     let ativo = true;
-    setCarregando(true);
-    setErroCarga(null);
+    setErro(null);
+    setErrosCampos({});
     Promise.all([
       plataformaApi.listar(), condicaoJogoApi.listar(), generoApi.listar(),
       edicao ? jogoApi.buscarPorId(id) : Promise.resolve(null),
     ])
-      .then(([p, c, g, jogo]) => {
+      .then(([opcoesPlataforma, opcoesCondicao, opcoesGenero, jogo]) => {
         if (!ativo) return;
-        setPlataformas(p); setCondicoes(c); setGeneros(g);
-        if (jogo) {
-          setForm({
-            nome: jogo.nome, descricao: jogo.descricao ?? '', anoLancamento: String(jogo.anoLancamento),
-            preco: String(jogo.preco), estoque: String(jogo.estoque),
-            idPlataforma: String(jogo.idPlataforma), idCondicaoJogo: String(jogo.idCondicaoJogo),
-            idsGenero: jogo.generos.map((x) => x.id), ativo: jogo.ativo,
-          });
-        }
+        setPlataformas(opcoesPlataforma);
+        setCondicoes(opcoesCondicao);
+        setGeneros(opcoesGenero);
+        setForm(jogo ? {
+          nome: jogo.nome, descricao: jogo.descricao ?? '', anoLancamento: String(jogo.anoLancamento),
+          preco: String(jogo.preco), estoque: String(jogo.estoque),
+          idPlataforma: String(jogo.idPlataforma), idCondicaoJogo: String(jogo.idCondicaoJogo),
+          idsGenero: jogo.generos.map((genero) => genero.id), ativo: jogo.ativo,
+        } : VAZIO);
+        setCarga({ id, tentativa });
       })
-      .catch((e) => ativo && setErroCarga(obterMensagemErro(e)))
-      .finally(() => ativo && setCarregando(false));
+      .catch((falha) => {
+        if (ativo) setCarga({ id, tentativa, erro: obterMensagemErro(falha) });
+      });
     return () => { ativo = false; };
-  }, [id, edicao]);
+  }, [id, edicao, tentativa]);
 
   const alterar = (campo) => (e) => setForm((f) => ({ ...f, [campo]: e.target.value }));
 
@@ -60,6 +62,8 @@ export default function FormularioJogo() {
 
   async function aoEnviar(evento) {
     evento.preventDefault();
+    if (enviando) return;
+
     setErro(null);
     setErrosCampos({});
     setEnviando(true);
@@ -94,8 +98,8 @@ export default function FormularioJogo() {
   const classe = (campo) => `form-control ${errosCampos[campo] ? 'is-invalid' : ''}`;
   const classeSelect = (campo) => `form-select ${errosCampos[campo] ? 'is-invalid' : ''}`;
 
-  if (carregando) return <Carregando />;
-  if (erroCarga) return <MensagemErro mensagem={erroCarga} />;
+  if (!carga || carga.id !== id || carga.tentativa !== tentativa) return <Carregando />;
+  if (carga.erro) return <MensagemErro mensagem={carga.erro} aoTentarNovamente={() => setTentativa((anterior) => anterior + 1)} />;
 
   return (
     <>
@@ -103,7 +107,7 @@ export default function FormularioJogo() {
       {erro && <div className="alert alert-danger" role="alert">{erro}</div>}
 
       <form onSubmit={aoEnviar} noValidate className="bg-white p-3 rounded shadow-sm">
-        <div className="row g-3">
+        <fieldset className="row g-3" disabled={enviando}>
           <div className="col-md-8">
             <label className="form-label" htmlFor="nome">Nome</label>
             <input id="nome" className={classe('nome')} value={form.nome} onChange={alterar('nome')} />
@@ -156,7 +160,7 @@ export default function FormularioJogo() {
             ))}
             {feedback('idsGenero')}
           </div>
-        </div>
+        </fieldset>
 
         <div className="mt-4 d-flex gap-2">
           <button className="btn btn-dark" type="submit" disabled={enviando}>{enviando ? 'Salvando...' : 'Salvar'}</button>

@@ -7,12 +7,19 @@ namespace RetroGames.WebApi.UnitTests;
 
 public class JogoValidatorsTests
 {
-    [Fact]
-    public void InserirJogo_PrecoZeroComDuasCasas_EValido()
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(1, true)]
+    public void InserirEAlterarJogo_ValidamPrecoEmCentavos(int centavos, bool valido)
     {
-        var resultado = new InserirJogoRequestValidator().Validate(NovoRequestInserir());
+        var inserir = NovoRequestInserir();
+        var alterar = NovoRequestAlterar();
+        var preco = centavos / 100m;
+        inserir.Preco = preco;
+        alterar.Preco = preco;
 
-        Assert.True(resultado.IsValid);
+        Assert.Equal(valido, new InserirJogoRequestValidator().Validate(inserir).IsValid);
+        Assert.Equal(valido, new AlterarJogoRequestValidator().Validate(alterar).IsValid);
     }
 
     [Fact]
@@ -43,7 +50,7 @@ public class JogoValidatorsTests
     {
         Nome = "Jogo teste",
         AnoLancamento = 1990,
-        Preco = 0m,
+        Preco = 0.01m,
         Estoque = 0,
         IdPlataforma = 1,
         IdCondicaoJogo = 1,
@@ -54,7 +61,7 @@ public class JogoValidatorsTests
     {
         Nome = "Jogo teste",
         AnoLancamento = 1990,
-        Preco = 0m,
+        Preco = 0.01m,
         Estoque = 0,
         IdPlataforma = 1,
         IdCondicaoJogo = 1,
