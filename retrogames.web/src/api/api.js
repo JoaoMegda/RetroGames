@@ -19,6 +19,7 @@ api.interceptors.request.use(async (requisicao) => {
       // O token antecede a conferência. Se o cookie mudar depois, a API invalida o token.
       const sessao = await clienteDireto.get('/Autenticacao/eu', {
         ...opcoes,
+        headers: { 'Cache-Control': 'no-cache' },
         validateStatus: (status) => status === 200 || status === 401,
       });
       if (sessao.data?.data?.id !== requisicao.idUsuarioEsperado) {

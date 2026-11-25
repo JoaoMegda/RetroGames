@@ -4,7 +4,10 @@ import api from './api.js';
 const dados = (promessa) => promessa.then((resposta) => resposta.data.data);
 
 export const autenticacaoApi = {
-  usuarioAtual: (sinal) => dados(api.get('/Autenticacao/eu', { signal: sinal })),
+  usuarioAtual: (sinal) => dados(api.get('/Autenticacao/eu', {
+    signal: sinal,
+    headers: { 'Cache-Control': 'no-cache' },
+  })),
   entrar: (email, senha) => dados(api.post('/Autenticacao/login', { email, senha })),
   cadastrar: (cadastro) => dados(api.post('/Autenticacao/cadastrar', cadastro)),
   sair: () => dados(api.post('/Autenticacao/logout')),

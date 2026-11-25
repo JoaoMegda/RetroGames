@@ -4,6 +4,7 @@ import axios from 'axios';
 import { SessaoAlteradaErro } from './erros.js';
 
 const chamadas = [];
+const pedido = { itens: [{ idJogo: 4, quantidade: 1 }] };
 let idUsuarioAtual;
 const adaptadorOriginal = axios.defaults.adapter;
 
@@ -28,7 +29,7 @@ test('confere a identidade após buscar o token e envia o pedido com o mesmo tok
   chamadas.length = 0;
   idUsuarioAtual = 5;
 
-  const resposta = await api.post('/Pedido', { itens: [] }, { idUsuarioEsperado: 5 });
+  const resposta = await api.post('/Pedido', pedido, { idUsuarioEsperado: 5 });
 
   assert.equal(resposta.data.data.id, 12);
   assert.deepEqual(chamadas, [
@@ -48,7 +49,7 @@ test('impede o envio do pedido quando outra aba alterou ou encerrou a sessão', 
       chamadas.length = 0;
       idUsuarioAtual = id;
       await assert.rejects(
-        api.post('/Pedido', { itens: [] }, { idUsuarioEsperado: 5 }),
+        api.post('/Pedido', pedido, { idUsuarioEsperado: 5 }),
         SessaoAlteradaErro,
       );
       assert.deepEqual(chamadas.map(({ rota }) => rota), ['/Autenticacao/csrf', '/Autenticacao/eu']);
