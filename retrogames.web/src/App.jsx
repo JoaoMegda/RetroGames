@@ -4,6 +4,9 @@ import RotaProtegida from './components/RotaProtegida.jsx';
 import Catalogo from './pages/Catalogo/Catalogo.jsx';
 import DetalheJogo from './pages/Catalogo/DetalheJogo.jsx';
 import Login from './pages/Login/Login.jsx';
+import Cadastro from './pages/Login/Cadastro.jsx';
+import Carrinho from './pages/Compras/Carrinho.jsx';
+import MeusPedidos from './pages/Compras/MeusPedidos.jsx';
 import Jogos from './pages/Administracao/Jogos.jsx';
 import FormularioJogo from './pages/Administracao/FormularioJogo.jsx';
 import Plataforma from './pages/Auxiliares/Plataforma.jsx';
@@ -13,12 +16,16 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        {/* públicas */}
         <Route index element={<Catalogo />} />
         <Route path="jogos/:id" element={<DetalheJogo />} />
         <Route path="login" element={<Login />} />
+        <Route path="cadastro" element={<Cadastro />} />
 
-        {/* restritas ao Administrador (a API é quem garante: 401/403) */}
+        <Route element={<RotaProtegida />}>
+          <Route path="carrinho" element={<Carrinho />} />
+          <Route path="meus-pedidos" element={<MeusPedidos />} />
+        </Route>
+
         <Route path="admin" element={<RotaProtegida somenteAdministrador />}>
           <Route index element={<Navigate to="jogos" replace />} />
           <Route path="jogos" element={<Jogos />} />

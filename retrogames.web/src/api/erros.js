@@ -1,7 +1,11 @@
 const MENSAGEM_PADRAO = 'Não foi possível concluir a operação. Tente novamente.';
 const MENSAGEM_CONEXAO = 'Não foi possível conectar ao servidor.';
 
+export class SessaoAlteradaErro extends Error {}
+
 export function obterMensagemErro(erro) {
+  if (erro instanceof SessaoAlteradaErro) return 'Sua sessão mudou. Confira sua conta e o carrinho antes de finalizar.';
+
   const resposta = erro?.response;
   // Quando a API está fora do ar, o proxy pode responder 5xx sem envelope.
   const falhaDeConexao = !resposta || (resposta.status >= 500 && resposta.data?.responseCode === undefined);
