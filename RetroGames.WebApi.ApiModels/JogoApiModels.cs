@@ -19,6 +19,7 @@ public class AlterarJogoRequestApiModel
     public int AnoLancamento { get; set; }
     public decimal Preco { get; set; }
     public int Estoque { get; set; }
+    public bool ManterEstoque { get; set; }
     public bool Ativo { get; set; }
     public int IdPlataforma { get; set; }
     public int IdCondicaoJogo { get; set; }

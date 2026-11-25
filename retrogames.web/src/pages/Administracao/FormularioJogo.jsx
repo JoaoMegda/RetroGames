@@ -43,7 +43,7 @@ export default function FormularioJogo() {
           idPlataforma: String(jogo.idPlataforma), idCondicaoJogo: String(jogo.idCondicaoJogo),
           idsGenero: jogo.generos.map((genero) => genero.id), ativo: jogo.ativo,
         } : VAZIO);
-        setCarga({ id, tentativa });
+        setCarga({ id, tentativa, estoqueInicial: jogo?.estoque });
       })
       .catch((falha) => {
         if (ativo) setCarga({ id, tentativa, erro: obterMensagemErro(falha) });
@@ -81,7 +81,11 @@ export default function FormularioJogo() {
 
     try {
       if (edicao) {
-        await jogoApi.alterar(id, { ...corpo, ativo: form.ativo });
+        const alteracao = { ...corpo, ativo: form.ativo };
+        if (form.estoque !== '' && corpo.estoque === carga.estoqueInicial) {
+          alteracao.manterEstoque = true;
+        }
+        await jogoApi.alterar(id, alteracao);
       } else {
         await jogoApi.inserir(corpo);
       }

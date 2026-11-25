@@ -9,6 +9,6 @@ public interface IJogoService
     Task<ListaPaginadaServiceModel<JogoDetalheServiceModel>> ListarAsync(JogoFiltroServiceModel filtro);
     Task<JogoDetalheServiceModel> ObterAsync(int id);
     Task<JogoDetalheServiceModel> InserirAsync(Jogo jogo, IReadOnlyCollection<int> idsGenero);
-    Task<JogoDetalheServiceModel> AlterarAsync(Jogo jogo, IReadOnlyCollection<int> idsGenero);
+    Task<JogoDetalheServiceModel> AlterarAsync(Jogo jogo, IReadOnlyCollection<int> idsGenero, bool manterEstoque = false);
     Task DesativarAsync(int id);
 }

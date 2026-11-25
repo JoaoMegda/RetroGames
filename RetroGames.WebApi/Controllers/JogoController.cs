@@ -44,7 +44,8 @@ public class JogoController : ControllerBase
     [Authorize(Policy = Politicas.Administrador)]
     public async Task<IActionResult> Alterar(int id, [FromBody] AlterarJogoRequestApiModel request)
     {
-        var jogo = await _service.AlterarAsync(JogoMapper.ParaModel(id, request), request.IdsGenero);
+        var jogo = await _service.AlterarAsync(
+            JogoMapper.ParaModel(id, request), request.IdsGenero, request.ManterEstoque);
         return Ok(EnvelopeApiModel.Sucesso(JogoMapper.ParaDetalheResponse(jogo)));
     }
 
