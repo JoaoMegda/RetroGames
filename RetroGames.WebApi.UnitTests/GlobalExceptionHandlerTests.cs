@@ -28,6 +28,7 @@ public class GlobalExceptionHandlerTests
         Assert.True(tratado);
         Assert.Equal(StatusCodes.Status404NotFound, contexto.Response.StatusCode);
         Assert.Equal(100, json.RootElement.GetProperty("responseCode").GetInt32());
+        Assert.Equal(JsonValueKind.Null, json.RootElement.GetProperty("data").ValueKind);
         Assert.Equal("Plataforma não encontrada.", json.RootElement.GetProperty("errorMessage").GetString());
     }
 

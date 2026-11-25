@@ -25,7 +25,13 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUsuarioAtualService, UsuarioAtualService>();
 
 builder.Services
-    .AddControllers(opcoes => opcoes.Filters.Add<FluentValidationFilter>())
+    .AddControllersWithViews(opcoes =>
+    {
+        opcoes.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+        // O envelope substitui a falha de CSRF antes da conversão padrão para ProblemDetails.
+        opcoes.Filters.Add<AntiforgeryEnvelopeFilter>(order: -3000);
+        opcoes.Filters.Add<FluentValidationFilter>();
+    })
     .ConfigureApiBehaviorOptions(opcoes =>
     {
         opcoes.SuppressModelStateInvalidFilter = true;

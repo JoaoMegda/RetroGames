@@ -7,15 +7,27 @@ public static class AutenticacaoConfig
 {
     public static void AdicionarAutenticacao(this IServiceCollection servicos, bool emDesenvolvimento)
     {
+        var politicaCookieSeguro = emDesenvolvimento
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
+
+        servicos.AddAntiforgery(opcoes =>
+        {
+            opcoes.HeaderName = "X-CSRF-TOKEN";
+            opcoes.SuppressReadingTokenFromFormBody = true;
+            opcoes.Cookie.Name = "retrogames.antiforgery";
+            opcoes.Cookie.HttpOnly = true;
+            opcoes.Cookie.SameSite = SameSiteMode.Strict;
+            opcoes.Cookie.SecurePolicy = politicaCookieSeguro;
+        });
+
         servicos.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(opcoes =>
             {
                 opcoes.Cookie.Name = "retrogames.sessao";
                 opcoes.Cookie.HttpOnly = true;
                 opcoes.Cookie.SameSite = SameSiteMode.Strict;
-                opcoes.Cookie.SecurePolicy = emDesenvolvimento
-                    ? CookieSecurePolicy.SameAsRequest
-                    : CookieSecurePolicy.Always;
+                opcoes.Cookie.SecurePolicy = politicaCookieSeguro;
                 opcoes.ExpireTimeSpan = TimeSpan.FromHours(2);
                 opcoes.SlidingExpiration = true;
                 opcoes.Events.OnRedirectToLogin = contexto =>
