@@ -83,6 +83,34 @@ public class JogoRepository : RepositoryBase, IJogoRepository
         ConsultarUmAsync($"SELECT {Colunas} FROM tb_jogo WHERE co_seq_jogo = @id",
             p => p.AddWithValue("@id", id), Mapear);
 
+    public Task<Jogo?> ObterParaCompraAsync(int id) =>
+        ConsultarUmAsync(
+            $"SELECT {Colunas} FROM tb_jogo WHERE co_seq_jogo = @id FOR UPDATE",
+            p => p.AddWithValue("@id", id),
+            Mapear);
+
+    public Task<List<Jogo>> ListarPorIdsAsync(IReadOnlyCollection<int> ids)
+    {
+        if (ids.Count == 0)
+            return Task.FromResult(new List<Jogo>());
+
+        return ConsultarAsync(
+            $"SELECT {Colunas} FROM tb_jogo WHERE co_seq_jogo IN ({NomesParametros("idJogo", ids.Count)})",
+            p => AdicionarLista(p, "idJogo", ids),
+            Mapear);
+    }
+
+    public async Task<bool> BaixarEstoqueAsync(int id, int quantidade) =>
+        await ExecutarAsync(
+            "UPDATE tb_jogo SET qt_estoque = qt_estoque - @quantidade " +
+            "WHERE co_seq_jogo = @id AND st_ativo = @ativo AND qt_estoque >= @quantidade",
+            p =>
+            {
+                p.AddWithValue("@id", id);
+                p.AddWithValue("@quantidade", quantidade);
+                p.AddWithValue("@ativo", true);
+            }) == 1;
+
     public async Task<int> InserirAsync(Jogo jogo)
     {
         var (idGerado, _) = await ExecutarGravacaoAsync(
@@ -104,10 +132,11 @@ public class JogoRepository : RepositoryBase, IJogoRepository
         return (int)idGerado;
     }
 
-    public async Task<bool> AlterarAsync(Jogo jogo) =>
+    public async Task<bool> AlterarAsync(Jogo jogo, bool manterEstoque = false) =>
         await ExecutarAsync(
             "UPDATE tb_jogo SET no_jogo = @nome, ds_jogo = @descricao, nu_ano_lancamento = @anoLancamento, " +
-            "vl_preco = @preco, qt_estoque = @estoque, st_ativo = @ativo, co_plataforma = @idPlataforma, co_condicao_jogo = @idCondicaoJogo " +
+            "vl_preco = @preco, qt_estoque = CASE WHEN @manterEstoque THEN qt_estoque ELSE @estoque END, " +
+            "st_ativo = @ativo, co_plataforma = @idPlataforma, co_condicao_jogo = @idCondicaoJogo " +
             "WHERE co_seq_jogo = @id",
             p =>
             {
@@ -117,6 +146,7 @@ public class JogoRepository : RepositoryBase, IJogoRepository
                 p.AddWithValue("@anoLancamento", jogo.AnoLancamento);
                 p.AddWithValue("@preco", jogo.Preco);
                 p.AddWithValue("@estoque", jogo.Estoque);
+                p.AddWithValue("@manterEstoque", manterEstoque);
                 p.AddWithValue("@ativo", jogo.Ativo);
                 p.AddWithValue("@idPlataforma", jogo.IdPlataforma);
                 p.AddWithValue("@idCondicaoJogo", jogo.IdCondicaoJogo);

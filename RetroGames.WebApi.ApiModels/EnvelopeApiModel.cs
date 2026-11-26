@@ -1,13 +1,10 @@
-using System.Text.Json.Serialization;
-
 namespace RetroGames.WebApi.ApiModels;
 
-/// <summary>Envelope de toda resposta: { responseCode, data, errorMessage }. "data" é omitido quando nulo.</summary>
+/// <summary>Envelope de toda resposta: { responseCode, data, errorMessage }.</summary>
 public class EnvelopeApiModel
 {
     public int ResponseCode { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public object? Data { get; set; }
 
     public string? ErrorMessage { get; set; }

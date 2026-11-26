@@ -84,7 +84,8 @@ public class JogoService : IJogoService
         return await ObterAsync(jogo.Id);
     }
 
-    public async Task<JogoDetalheServiceModel> AlterarAsync(Jogo jogo, IReadOnlyCollection<int> idsGenero)
+    public async Task<JogoDetalheServiceModel> AlterarAsync(
+        Jogo jogo, IReadOnlyCollection<int> idsGenero, bool manterEstoque = false)
     {
         _ = await _repositorios.Jogo.ObterPorIdAsync(jogo.Id)
             ?? throw new BusinessRuleException(BusinessErrors.JogoNaoEncontrado);
@@ -100,7 +101,7 @@ public class JogoService : IJogoService
         using (var transactionScope = new TransactionScope(TransactionScopeOption.Required,
                    transactionOptions, TransactionScopeAsyncFlowOption.Enabled))
         {
-            await _repositorios.Jogo.AlterarAsync(jogo);
+            await _repositorios.Jogo.AlterarAsync(jogo, manterEstoque);
             await _repositorios.JogoGenero.ExcluirPorJogoAsync(jogo.Id);
             foreach (var idGenero in idsDistintos)
                 await _repositorios.JogoGenero.InserirAsync(new JogoGenero { IdJogo = jogo.Id, IdGenero = idGenero });

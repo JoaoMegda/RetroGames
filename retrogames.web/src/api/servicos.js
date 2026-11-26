@@ -4,8 +4,12 @@ import api from './api.js';
 const dados = (promessa) => promessa.then((resposta) => resposta.data.data);
 
 export const autenticacaoApi = {
-  usuarioAtual: (sinal) => dados(api.get('/Autenticacao/eu', { signal: sinal })),
+  usuarioAtual: (sinal) => dados(api.get('/Autenticacao/eu', {
+    signal: sinal,
+    headers: { 'Cache-Control': 'no-cache' },
+  })),
   entrar: (email, senha) => dados(api.post('/Autenticacao/login', { email, senha })),
+  cadastrar: (cadastro) => dados(api.post('/Autenticacao/cadastrar', cadastro)),
   sair: () => dados(api.post('/Autenticacao/logout')),
 };
 
@@ -31,4 +35,15 @@ export const jogoApi = {
   inserir: (jogo) => dados(api.post('/Jogo', jogo)),
   alterar: (id, jogo) => dados(api.put(`/Jogo/${id}`, jogo)),
   desativar: (id) => dados(api.delete(`/Jogo/${id}`)),
+};
+
+export const pedidoApi = {
+  criar: async (itens, idUsuarioEsperado) => {
+    const resposta = await api.post('/Pedido', { itens }, { idUsuarioEsperado });
+    if (resposta.status !== 201 || resposta.data?.responseCode !== 0 || !resposta.data.data?.id) {
+      throw new Error('O servidor não confirmou o pedido.');
+    }
+    return resposta.data.data;
+  },
+  listarMeus: (sinal) => dados(api.get('/Pedido/meus', { signal: sinal })),
 };

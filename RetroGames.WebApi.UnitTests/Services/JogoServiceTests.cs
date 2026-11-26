@@ -191,6 +191,49 @@ public class JogoServiceTests
         _jogos.Verify(r => r.ObterPorIdAsync(idInexistente), Times.Once);
     }
 
+    [Theory]
+    [InlineData(true, 0)]
+    [InlineData(false, 1)]
+    public async Task AlterarAsync_ComEstoqueAlteradoDesdeACarga_RespeitaOpcaoDeManterEstoque(
+        bool manterEstoque, int estoqueEsperado)
+    {
+        var jogoNoBanco = NovoJogo();
+        jogoNoBanco.Id = 42;
+        jogoNoBanco.Ativo = true;
+
+        var alteracao = NovoJogo();
+        alteracao.Id = jogoNoBanco.Id;
+        alteracao.Nome = "Chrono Trigger revisado";
+        alteracao.Estoque = 1;
+
+        _jogos.Setup(r => r.ObterPorIdAsync(jogoNoBanco.Id)).ReturnsAsync(jogoNoBanco);
+        _jogos.Setup(r => r.AlterarAsync(alteracao, It.IsAny<bool>()))
+            .Callback<Jogo, bool>((jogo, preservarEstoque) =>
+            {
+                jogoNoBanco.Nome = jogo.Nome;
+                if (!preservarEstoque)
+                    jogoNoBanco.Estoque = jogo.Estoque;
+            })
+            .ReturnsAsync(true);
+        _plataformas.Setup(r => r.ObterPorIdAsync(alteracao.IdPlataforma))
+            .ReturnsAsync(new Plataforma { Id = alteracao.IdPlataforma });
+        _condicoes.Setup(r => r.ObterPorIdAsync(alteracao.IdCondicaoJogo))
+            .ReturnsAsync(new CondicaoJogo { Id = alteracao.IdCondicaoJogo });
+        _generos.Setup(r => r.ListarPorIdsAsync(It.IsAny<IReadOnlyCollection<int>>()))
+            .ReturnsAsync([new Genero { Id = 3 }]);
+        _jogosGeneros.Setup(r => r.ListarPorJogosAsync(It.IsAny<IReadOnlyCollection<int>>())).ReturnsAsync([]);
+        _plataformas.Setup(r => r.ListarAsync()).ReturnsAsync([]);
+        _condicoes.Setup(r => r.ListarAsync()).ReturnsAsync([]);
+        _generos.Setup(r => r.ListarAsync()).ReturnsAsync([]);
+
+        var resultado = manterEstoque
+            ? await _servico.AlterarAsync(alteracao, [3], manterEstoque: true)
+            : await _servico.AlterarAsync(alteracao, [3]);
+
+        Assert.Equal(estoqueEsperado, resultado.Estoque);
+        Assert.Equal("Chrono Trigger revisado", resultado.Nome);
+    }
+
     [Fact]
     public async Task DesativarAsync_IdInexistente_LancaJogoNaoEncontradoSemDesativar()
     {

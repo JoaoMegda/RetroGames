@@ -1,54 +1,41 @@
-# RetroGames — back-end (base)
+# RetroGames
 
-Banco MySQL, API em camadas, testes e front-end React (`retrogames.web`).
+Loja de jogos retrô com catálogo público, administração e a versão Básica do Módulo de Compras. O back-end usa ASP.NET Core e MySQL 8. A interface usa React, Vite, Bootstrap e Axios.
 
-## Montar a solução (na raiz do repositório)
+## Configurar o banco
 
-```
-dotnet new sln -n RetroGames --format sln
-dotnet sln add RetroGames.Model RetroGames.Repository RetroGames.Services RetroGames.WebApi.ApiModels RetroGames.WebApi RetroGames.WebApi.UnitTests
-dotnet restore
-dotnet build
-```
+1. Em um banco novo, execute [scripts/001_criar_estrutura.sql](scripts/001_criar_estrutura.sql) para criar catálogo e usuários. Se o banco de catálogo já existe e funciona, siga para o próximo passo.
+2. Execute [scripts/002_criar_tabelas_compras.sql](scripts/002_criar_tabelas_compras.sql) uma vez, com o banco RetroGames selecionado. Esse script acrescenta situações, pedidos e itens de pedido.
+3. Copie o arquivo .env.example para .env na raiz e preencha os valores do seu ambiente. O .env é ignorado pelo Git. Se o banco já tem uma conta administrativa, use essa conta.
 
-(No .NET 10, `dotnet new sln` cria `.slnx` por padrão; `--format sln` gera o `RetroGames.sln` da especificação.)
-Se algum pacote não restaurar na versão indicada nos `.csproj`, ajuste para a versão disponível.
+## Executar
 
-## Configurar e executar
+Na raiz:
 
-1. Execute `scripts/001_criar_estrutura.sql` no MySQL 8.
-2. Copie `.env.example` para `.env` (raiz) e troque `SUA_SENHA` pelas suas senhas. O `.env` está no `.gitignore`.
-3. `dotnet run --project RetroGames.WebApi` → API em http://localhost:5080, Swagger em /swagger.
-4. `dotnet test` na raiz.
+~~~powershell
+dotnet run --project RetroGames.WebApi
+~~~
 
-## Conferência da Aula 6
+Em outro terminal:
 
-Abra o Swagger em `http://localhost:5080/swagger` em uma janela anônima. Use uma
-sessão sem login para as linhas que pedem acesso anônimo e um banco de
-desenvolvimento para a gravação de teste.
-
-| Requisição | HTTP | `responseCode` |
-| --- | ---: | --- |
-| `POST /api/Plataforma` sem login | 401 | 4 |
-| `POST /api/Autenticacao/login` com senha errada | 401 | 6 |
-| `POST /api/Autenticacao/login` com e-mail malformado | 400 | 3, com erros em `data` |
-| `POST /api/Autenticacao/login` com as credenciais do administrador | 200 | 0 |
-| `POST /api/Plataforma` após login como administrador | 201 | 0 |
-| `GET /api/Jogo?incluirInativos=true` sem login | 200 | 0, apenas jogos ativos |
-| `POST /api/Autenticacao/logout` e depois `GET /api/Autenticacao/eu` | 200 e 401 | 0 e 4 |
-
-Confira o cookie `retrogames.sessao` com `HttpOnly` e `SameSite=Strict` após
-entrar. Com um jogo inativo no banco, compare a listagem anônima com a do
-administrador usando `incluirInativos=true`. O detalhe do inativo responde 404 ao
-visitante e 200 ao administrador. Uma conta de teste com perfil Cliente recebe
-403, código 5, ao tentar gravar no catálogo.
-
-## Front-end (`retrogames.web`)
-
-```
+~~~powershell
 cd retrogames.web
-npm install
-npm run dev      # http://localhost:5173 (o Vite encaminha /api para a API em :5080)
-```
+npm ci
+npm run dev
+~~~
 
-Suba a API antes (veja acima). Ela usa `AdminInicial__Email` e `AdminInicial__Senha` do `.env` para criar a primeira conta administrativa. Se o banco já tem um administrador, use as credenciais dessa conta.
+Abra [a loja](http://localhost:5173). A [documentação da API](http://localhost:5080/swagger) está disponível com a configuração de desenvolvimento. O Vite encaminha /api para a porta 5080 e mantém o front-end e a API na mesma origem para os cookies.
+
+## Verificar a entrega
+
+~~~powershell
+dotnet test RetroGames.sln
+cd retrogames.web
+npm run build
+~~~
+
+Em um banco de desenvolvimento, use um jogo público com estoque e faça o fluxo de cadastro, carrinho, finalização e Meus pedidos. Confira a baixa de estoque. Repita com quantidade maior do que o estoque disponível e verifique que a tentativa não deixou pedido, itens ou baixa parcial.
+
+Para testar gravações diretamente na API, obtenha o token por GET /api/Autenticacao/csrf na mesma sessão e envie-o como X-CSRF-TOKEN em POST, PUT e DELETE. Conserve os cookies nas chamadas e obtenha outro token depois de entrar, cadastrar-se ou sair. A interface faz isso automaticamente.
+
+Veja a [especificação do módulo e o guia de apresentação](docs/MODULO_COMPRAS.md) e o [quadro público da sprint](https://github.com/users/JoaoMegda/projects/2).

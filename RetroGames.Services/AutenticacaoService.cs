@@ -28,6 +28,35 @@ public class AutenticacaoService : IAutenticacaoService
         return await MontarAsync(usuario);
     }
 
+    public async Task<UsuarioAutenticadoServiceModel> CadastrarAsync(string nome, string email, string senha)
+    {
+        email = email.Trim();
+        if (await _repositorios.Usuario.ObterPorEmailAsync(email) is not null)
+            throw new BusinessRuleException(BusinessErrors.EMAIL_JA_CADASTRADO);
+
+        var usuario = new Usuario
+        {
+            Nome = nome.Trim(),
+            Email = email,
+            Ativo = true,
+            DataCadastro = DateTime.UtcNow,
+            IdPerfil = PerfisIds.Cliente,
+        };
+        usuario.SenhaHash = _hasher.HashPassword(usuario, senha);
+
+        try
+        {
+            usuario.Id = await _repositorios.Usuario.InserirAsync(usuario);
+        }
+        catch (RegistroDuplicadoException)
+        {
+            // O e-mail pode ter sido cadastrado entre a consulta e o INSERT.
+            throw new BusinessRuleException(BusinessErrors.EMAIL_JA_CADASTRADO);
+        }
+
+        return await MontarAsync(usuario);
+    }
+
     public async Task<UsuarioAutenticadoServiceModel> ObterUsuarioAsync(int id)
     {
         var usuario = await _repositorios.Usuario.ObterPorIdAsync(id);

@@ -14,10 +14,13 @@ public static class InjecaoDependenciaConfig
 
         servicos.AddScoped<ICondicaoJogoRepository, CondicaoJogoRepository>();
         servicos.AddScoped<IGeneroRepository, GeneroRepository>();
+        servicos.AddScoped<IItemPedidoRepository, ItemPedidoRepository>();
         servicos.AddScoped<IJogoGeneroRepository, JogoGeneroRepository>();
         servicos.AddScoped<IJogoRepository, JogoRepository>();
+        servicos.AddScoped<IPedidoRepository, PedidoRepository>();
         servicos.AddScoped<IPerfilRepository, PerfilRepository>();
         servicos.AddScoped<IPlataformaRepository, PlataformaRepository>();
+        servicos.AddScoped<ISituacaoPedidoRepository, SituacaoPedidoRepository>();
         servicos.AddScoped<IUsuarioRepository, UsuarioRepository>();
         servicos.AddScoped<IRepositorySet, RepositorySet>();
 
@@ -31,6 +34,7 @@ public static class InjecaoDependenciaConfig
         servicos.AddScoped<ICondicaoJogoService, CondicaoJogoService>();
         servicos.AddScoped<IGeneroService, GeneroService>();
         servicos.AddScoped<IJogoService, JogoService>();
+        servicos.AddScoped<IPedidoService, PedidoService>();
         servicos.AddScoped<IPlataformaService, PlataformaService>();
 
         return servicos;
